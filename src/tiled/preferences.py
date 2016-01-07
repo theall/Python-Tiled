@@ -250,8 +250,7 @@ class Preferences(QObject):
         if (self.mLanguage == language):
             return
         self.mLanguage = language
-        self.mSettings.setValue("Interface/Language",
-                            self.mLanguage)
+        self.mSettings.setValue("Interface/Language", self.mLanguage)
         languagemanager.LanguageManager.instance().installTranslators()
 
     def reloadTilesetsOnChange(self):

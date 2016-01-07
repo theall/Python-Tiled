@@ -122,9 +122,9 @@ class ToolManager(QObject):
             tool = action.data()
             tool.languageChanged()
             # Update the text, shortcut and tooltip of the action
-            action.setText(tool.name())
-            action.setShortcut(tool.shortcut())
-            action.setToolTip(QString("%s (%s)"%(tool.name(), tool.shortcut().toString())))
+            action.setText(tool.name)
+            action.setShortcut(tool.shortcut)
+            action.setToolTip("%s (%s)"%(tool.name, tool.shortcut.toString()))
 
     def actionTriggered(self, action):
         self.setSelectedTool(action.data())

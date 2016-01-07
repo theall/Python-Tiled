@@ -94,9 +94,9 @@ class SetLayerOffset(QUndoCommand):
     def __init__(self, mapDocument, layerIndex, offset):
         super().__init__()
         
-        mMapDocument = mapDocument
+        self.mMapDocument = mapDocument
         self.mLayerIndex = layerIndex
-        self.mOldOffset = mMapDocument.map().layerAt(layerIndex).offset()
+        self.mOldOffset = self.mMapDocument.map().layerAt(layerIndex).offset()
         self.mNewOffset = offset
 
         self.setText(QCoreApplication.translate("Undo Commands", "Change Layer Offset"))

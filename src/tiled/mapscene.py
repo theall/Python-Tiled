@@ -303,7 +303,7 @@ class MapScene(QGraphicsScene):
             # Changing the line width can change the size of the object items
             if (not self.mObjectItems.isEmpty()):
                 for item in self.mObjectItems:
-                    item.syncWithMapObject()
+                    item[1].syncWithMapObject()
                 self.update()
 
     def setShowTileObjectOutlines(self, enabled):

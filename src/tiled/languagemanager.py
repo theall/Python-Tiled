@@ -102,4 +102,4 @@ class LanguageManager():
             iterator.next()
             baseName = iterator.fileInfo().completeBaseName()
             # Cut off "tiled_" from the start
-            self.mLanguages.append(baseName[6])
+            self.mLanguages.append(baseName[6:])

@@ -104,6 +104,8 @@ class PreferencesDialog(QDialog):
 
     def languageSelected(self, index):
         language = self.mUi.languageCombo.itemData(index)
+        if language is None:
+            language = ''
         prefs = preferences.Preferences.instance()
         prefs.setLanguage(language)
 
