@@ -507,6 +507,8 @@ class MapScene(QGraphicsScene):
         for o in objects:
             i = self.mObjectItems.find(o)
             self.mSelectedObjectItems.remove(i)
+            # python would not force delete QGraphicsItem
+            self.removeItem(i)
             self.mObjectItems.erase(o)
 
     ##

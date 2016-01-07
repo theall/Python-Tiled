@@ -332,10 +332,11 @@ class MapObject(Object):
             center2 = self.mPolygon.boundingRect().center() * 2
             if (direction == FlipDirection.FlipHorizontally):
                 for i in range(self.mPolygon.size()):
-                    self.mPolygon[i].setX(center2.x() - self.mPolygon[i].x())
+                    # oh, QPointF mPolygon returned is a copy of internal object
+                    self.mPolygon[i] = QPointF(center2.x() - self.mPolygon[i].x(), self.mPolygon[i].y())
             elif (direction == FlipDirection.FlipVertically):
                 for i in range(self.mPolygon.size()):
-                    self.mPolygon[i].setY(center2.y() - self.mPolygon[i].y())
+                    self.mPolygon[i] = QPointF(self.mPolygon[i].x(), center2.y() - self.mPolygon[i].y())
 
     ##
     # Returns a duplicate of this object. The caller is responsible for the
