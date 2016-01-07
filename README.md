@@ -23,50 +23,21 @@ easier to use map editor. Qt offered many opportunities to improve the
 performance and usability of the user interface, and has a more extensive
 feature set than the standard Java libraries.
 
-Compiling
+Prerequisites
 -------------------------------------------------------------------------------
 
-Make sure the Qt (>= 4.7) development libraries are installed:
+To be able to run Tiled you should have the following installed:
 
-* In Ubuntu/Debian: `sudo apt-get install libqt4-dev libqt4-opengl-dev zlib1g-dev`
-* In Fedora:        `yum install qt-devel`
-* In Arch Linux:    `pacman -S qt`
-* In Mac OS X with [Homebrew](http://brew.sh/): `brew install qt`
+* [Python 3.3.0 or better](http://www.python.org/download/)
+* [PyQt 5.4.1 or better](https://riverbankcomputing.com/software/pyqt/download5)
 
-Now you can compile by running:
+Optionally you may download and install Eric6 as the IDE
 
-    $ qmake (or qmake-qt4 on some systems, like Fedora)
-    $ make
+* [Eric 6.0.11 or better](http://eric-ide.python-projects.org/eric-download.html)
 
-To do a shadow build, you can run qmake from a different directory and refer
-it to tiled.pro, for example:
-
-    $ mkdir build
-    $ cd build
-    $ qmake ../tiled.pro
-    $ make
-
-You can now simply run Tiled using bin/tiled.
-
-Installing
+Running
 -------------------------------------------------------------------------------
+* Run main.py in directory "/src"
+* In Eric6 press Shift+F2 to run project
 
-For installing Tiled you can run `make install`. By default Tiled will install
-to `/usr/local`. You can change this prefix when running qmake, and/or you can
-change the install root when running make install, as follows:
 
-Use `/usr` instead of `/usr/local`:
-
-    $ qmake -r PREFIX=/usr
-
-(Recursive needed when it's not the first time that you're running qmake, since
-this affects nested pro files)
-
-Install to some packaging directory:
-
-    $ make install INSTALL_ROOT=/tmp/tiled-pkg
-
-By default, Tiled and its plugins are compiled with an Rpath so that they can
-find the shared libtiled library when running it straight after compile. When
-packaging for a distribution, this Rpath should generally be disabled by
-appending `RPATH=no` to the qmake command.
