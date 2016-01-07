@@ -210,7 +210,7 @@ class QList(list):
         if count < 1:
             return
         for i in range(count):
-            self.__delitem__[_from]
+            self.__delitem__(_from)
     
     def takeAt(self, index):
         if index<0 or index>=self.__len__():
@@ -340,6 +340,9 @@ class QMap(QList):
 
     def first(self):
         return self.itemByIndex(0)
+        
+    def begin(self):
+        return 0
         
 class QMapList(QMap):
     def __init__(self, key=None, value=None):

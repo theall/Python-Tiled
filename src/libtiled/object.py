@@ -49,29 +49,29 @@ class Object():
             self.mTypeId = arg.mTypeId
             self.mProperties = arg.mProperties
 
-    ##*
+    ##
     # Virtual destructor.
     ##
     def __del__(self):
         pass
-    ##*
+    ##
     # Returns the type of this object.
     ##
     def typeId(self):
         return self.mTypeId
 
-    ##*
+    ##
     # Returns the properties of this object.
     ##
     def properties(self):
         return self.mProperties
 
-    ##*
+    ##
     # Replaces all existing properties with a new set of properties.
     ##
     def setProperties(self, properties):
         self.mProperties = properties
-    ##*
+    ##
     # Merges \a properties with the existing properties. Properties with the
     # same name will be overridden.
     #
@@ -79,22 +79,22 @@ class Object():
     ##
     def mergeProperties(self, properties):
         self.mProperties.merge(properties)
-    ##*
+    ##
     # Returns the value of the object's \a name property.
     ##
     def property(self, name):
         return self.mProperties.value(name)
-    ##*
+    ##
     # Returns whether this object has a property with the given \a name.
     ##
     def hasProperty(self, name):
         return self.mProperties.contains(name)
-    ##*
+    ##
     # Sets the value of the object's \a name property to \a value.
     ##
     def setProperty(self, name, value):
         self.mProperties.insert(name, value)
-    ##*
+    ##
     # Removes the property with the given \a name.
     ##
     def removeProperty(self, name):

@@ -186,12 +186,12 @@ class ObjectGroup(Layer):
         # when the number of objects to be moved is 0.
         if (to == _from or to == _from + count or count == 0):
             return
-        movingObjects = self.mObjects[_from, count]
-        self.mObjects.erase(self.mObjects.begin() + _from, self.mObjects.begin() + _from + count)
+        movingObjects = self.mObjects[_from:_from+count]
+        self.mObjects.erase(_from, _from + count)
         if (to > _from):
             to -= count
         for i in range(count):
-            self.mObjects.insert(to + i, movingObjects.at(i))
+            self.mObjects.insert(to + i, movingObjects[i])
 
     ##
     # Returns the bounding rect around all objects in this object group.

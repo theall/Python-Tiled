@@ -30,7 +30,7 @@ from pyqtcore import (
     QString,
     QStringList
 )
-##*
+##
 # An interface to be implemented by map writers. A map writer implements
 # support for saving to a certain map format.
 #
@@ -41,7 +41,7 @@ class MapWriterInterface():
 
     def __del__(self):
         pass
-    ##*
+    ##
     # Writes the given map to the given file name.
     #
     # @return <code>true</code> on success, <code>false when an error
@@ -49,20 +49,20 @@ class MapWriterInterface():
     ##
     def write(self, map, fileName):
         pass
-    ##*
+    ##
     # Returns name filters of this map writer, for multiple formats.
     ##
     def nameFilters(self):
         return QStringList(self.nameFilter())
 
-    ##*
+    ##
     # Returns the error to be shown to the user if an error occured while
     # trying to write a map.
     ##
     def errorString(self):
         pass
 
-    ##*
+    ##
     # Returns the name filter of this map writer.
     #
     # Protected because it should not be used outside the plugin since

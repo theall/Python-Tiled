@@ -30,7 +30,7 @@ from object import Object
 from pyqtcore import (
     QVector
 )
-##*
+##
 # Represents a terrain type.
 ##
 class Terrain(Object):
@@ -43,19 +43,19 @@ class Terrain(Object):
         self.mImageTileId = imageTileId
         self.mTransitionDistance = QVector()
 
-    ##*
+    ##
     # Returns ID of this terrain type.
     ##
     def id(self):
         return self.mId
 
-    ##*
+    ##
     # Sets the ID of this terrain type.
     ##
     def setId(self, id):
         self.mId = id
 
-    ##*
+    ##
     # Returns the tileset this terrain type belongs to.
     ##
     def tileset(self):
@@ -67,48 +67,48 @@ class Terrain(Object):
     def sharedTileset(self):
         return self.mTileset.sharedPointer()
 
-    ##*
+    ##
     # Returns the name of this terrain type.
     ##
     def name(self):
         return self.mName
 
-    ##*
+    ##
     # Sets the name of this terrain type.
     ##
     def setName(self, name):
         self.mName = name
 
-    ##*
+    ##
     # Returns the index of the tile that visually represents this terrain type.
     ##
     def imageTileId(self):
         return self.mImageTileId
 
-    ##*
+    ##
     # Sets the index of the tile that visually represents this terrain type.
     ##
     def setImageTileId(self, imageTileId):
         self.mImageTileId = imageTileId
 
-    ##*
+    ##
     # Returns a Tile that represents this terrain type in the terrain palette.
     ##
     def imageTile(self):
         pass#return self.mImageTileId >= 0 ? self.mTileset.tileAt(self.mImageTileId) : 0
-    ##*
+    ##
     # Returns the transition penalty(/distance) from this terrain type to another terrain type.
     ##
     def transitionDistance(self, targetTerrainType):
         return self.mTransitionDistance[targetTerrainType + 1]
 
-    ##*
+    ##
     # Sets the transition penalty(/distance) from this terrain type to another terrain type.
     ##
     def setTransitionDistance(self, targetTerrainType, distance):
         self.mTransitionDistance[targetTerrainType + 1] = distance
 
-    ##*
+    ##
     # Returns the array of terrain penalties(/distances).
     ##
     def setTransitionDistances(self, transitionDistances):

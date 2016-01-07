@@ -47,19 +47,19 @@ def toImageFileFilter(formats):
     return filter
 
 class Utils():
-    ##*
+    ##
     # Returns a file dialog filter that matches all readable image formats.
     ##
     def readableImageFormatsFilter():
         return toImageFileFilter(QImageReader.supportedImageFormats())
 
-    ##*
+    ##
     # Returns a file dialog filter that matches all writable image formats.
     ##
     def writableImageFormatsFilter():
         return toImageFileFilter(QImageWriter.supportedImageFormats())
 
-    ##*
+    ##
     # Looks up the icon with the specified \a name from the system theme and set
     # it on the instance \a t when found.
     #
@@ -74,7 +74,7 @@ class Utils():
             if (not themeIcon.isNull()):
                 t.setIcon(themeIcon)
 
-    ##*
+    ##
     # Restores a widget's geometry.
     # Requires the widget to have its object name set.
     ##
@@ -87,7 +87,7 @@ class Utils():
             geo = QByteArray()
         widget.restoreGeometry(geo)
 
-    ##*
+    ##
     # Saves a widget's geometry.
     # Requires the widget to have its object name set.
     ##

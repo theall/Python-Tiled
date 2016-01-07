@@ -53,71 +53,78 @@ class RaiseLowerHelper():
         if (not self.initContext()):
             return
         # Iterate backwards over the ranges in order to keep the indexes valid
+        size = len(self.mSelectionRanges)
+        if size <= 0:# no range
+            return
         firstRange = self.mSelectionRanges.begin()
         it = self.mSelectionRanges.end()
         if (it == firstRange): # no range
             return
         # For each range of objects, only the first will move
         commands = QList()
-        while (it != firstRange):
-            it -= 1
+        
+        lastIndex = len(self.mRelatedObjects) - 1
+        for i in range(size-1, -1, -1):
+            it = self.mSelectionRanges.item(i)
+            value = it[1]
             # The last range may be already at the top of the related items
-            if (it.last() == self.mRelatedObjects.size() - 1):
+            if value == lastIndex:
                 continue
-            movingItem = self.mRelatedObjects.at(it.last())
-            targetItem = self.mRelatedObjects.at(it.last() + 1)
-            _from = movingItem.zValue()
-            to = targetItem.zValue() + 1
+            movingItem = self.mRelatedObjects.at(value)
+            targetItem = self.mRelatedObjects.at(value + 1)
+            _from = int(movingItem.zValue())
+            to = int(targetItem.zValue() + 1)
             commands.append(ChangeMapObjectsOrder(self.mMapDocument, self.mObjectGroup,
                                                       _from, to, 1))
-        self.push(commands,
-             QCoreApplication.translate("Undo Commands", "Raise Object"))
+        self.push(commands, QCoreApplication.translate("Undo Commands", "Raise Object"))
 
     def lower(self):
         if (not self.initContext()):
             return
-        it = self.mSelectionRanges.begin()
-        it_end = self.mSelectionRanges.end()
+
         # For each range of objects, only the first will move
         commands = QList()
-        while(it != it_end):
+        for it in self.mSelectionRanges:
+            value = it[0]
             # The first range may be already at the bottom of the related items
-            if (it.first() == 0):
+            if (value == 0):
                 continue
-            movingItem = self.mRelatedObjects.at(it.first())
-            targetItem = self.mRelatedObjects.at(it.first() - 1)
-            _from = movingItem.zValue()
-            to = targetItem.zValue()
+            movingItem = self.mRelatedObjects.at(value)
+            targetItem = self.mRelatedObjects.at(value - 1)
+            _from = int(movingItem.zValue())
+            to = int(targetItem.zValue())
             commands.append(ChangeMapObjectsOrder(self.mMapDocument, self.mObjectGroup, _from, to, 1))
-            it += 1
 
         self.push(commands, QCoreApplication.translate("Undo Commands", "Lower Object"))
 
     def raiseToTop(self):
         selectedItems = self.mMapScene.selectedObjectItems()
-        objectGroup = self.sameObjectGroup(selectedItems)
+        objectGroup = RaiseLowerHelper.sameObjectGroup(selectedItems)
         if (not objectGroup):
             return
         if (objectGroup.drawOrder() != ObjectGroup.DrawOrder.IndexOrder):
             return
         ranges = RangeSet()
         for item in selectedItems:
-            ranges.insert(item.zValue())
+            ranges.insert(int(item.zValue()))
+ 
         # Iterate backwards over the ranges in order to keep the indexes valid
-        firstRange = ranges.begin()
-        it = ranges.end()
-        if (it == firstRange): # no range
+        size = len(ranges)
+        if size <= 0:# no range
             return
+
         commands = QList()
         to = objectGroup.objectCount()
-        while (it != firstRange):
-            it -= 1
-            count = it.length()
-            if (it.last() + 1 == to):
+        for i in range(size-1, -1, -1):
+            it = ranges.item(i)
+            first = it[0]
+            last = it[1]
+            count = last - first + 1
+            if (last + 1 == to):
                 to -= count
                 continue
 
-            _from = it.first()
+            _from = first
             commands.append(ChangeMapObjectsOrder(self.mMapDocument, objectGroup,
                                                       _from, to, count))
             to -= count
@@ -127,21 +134,21 @@ class RaiseLowerHelper():
 
     def lowerToBottom(self):
         selectedItems = self.mMapScene.selectedObjectItems()
-        objectGroup = self.sameObjectGroup(selectedItems)
+        objectGroup = RaiseLowerHelper.sameObjectGroup(selectedItems)
         if (not objectGroup):
             return
         if (objectGroup.drawOrder() != ObjectGroup.DrawOrder.IndexOrder):
             return
         ranges = RangeSet()
         for item in selectedItems:
-            ranges.insert(item.zValue())
-        it = ranges.begin()
-        it_end = ranges.end()
+            ranges.insert(int(item.zValue()))
+
         commands = QList()
         to = 0
-        while(it != it_end):
-            _from = it.first()
-            count = it.length()
+        for it in ranges:
+            first = it[0]
+            _from = first
+            count = it[1] - first + 1
             if (_from == to):
                 to += count
                 continue
@@ -149,7 +156,6 @@ class RaiseLowerHelper():
             commands.append(ChangeMapObjectsOrder(self.mMapDocument, objectGroup,
                                                       _from, to, count))
             to += count
-            it += 1
 
         self.push(commands,
              QCoreApplication.translate("Undo Commands", "Lower Object To Bottom"))

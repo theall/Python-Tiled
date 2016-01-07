@@ -30,7 +30,7 @@ from pyqtcore import (
     QString,
     QStringList
 )
-##*
+##
 # An interface to be implemented by map readers. A map reader implements
 # support for loading a certain map format.
 #
@@ -41,32 +41,32 @@ class MapReaderInterface():
 
     def __del__(self):
         pass
-    ##*
+    ##
     # Reads the map and returns a new Map instance, or 0 if reading failed.
     ##
     def read(self, fileName):
         pass
-    ##*
+    ##
     # Returns name filters of this map reader, for multiple formats.
     ##
     def nameFilters(self):
         return QStringList(self.nameFilter())
 
-    ##*
+    ##
     # Returns whether this map reader supports reading the given file.
     #
     # Generally would do a file extension check.
     ##
     def supportsFile(self, fileName):
         pass
-    ##*
+    ##
     # Returns the error to be shown to the user if an error occured while
     # trying to read a map.
     ##
     def errorString(self):
         pass
 
-    ##*
+    ##
     # Returns the name filter of this map reader.
     #
     # Protected because it should not be used outside the plugin since
