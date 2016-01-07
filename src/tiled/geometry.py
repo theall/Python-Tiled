@@ -19,8 +19,7 @@
 ##
 
 from PyQt5.QtCore import (
-    QPoint,
-    qAbs
+    QPoint
 )
 from pyqtcore import QVector, QList
 
@@ -114,19 +113,19 @@ def pointsOnLine(*args):
     else:
         x0, y0, x1, y1 = args
         ret = QVector()
-        steep = qAbs(y1 - y0) > qAbs(x1 - x0)
-        if (steep):
+        steep = abs(y1 - y0) > abs(x1 - x0)
+        if steep:
             x0, y0 = y0, x0
             x1, y1 = y1, x1
 
         reverse = x0 > x1
         if reverse:
-            x0, y0 = y0, x0
-            x1, y1 = y1, x1
+            x0, x1 = x1, x0
+            y0, y1 = y1, y0
 
         deltax = x1 - x0
-        deltay = qAbs(y1 - y0)
-        error= deltax / 2
+        deltay = abs(y1 - y0)
+        error= int(deltax / 2)
         ystep = 0
         y = y0
         if (y0 < y1):

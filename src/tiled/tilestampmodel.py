@@ -101,9 +101,7 @@ class TileStampModel(QAbstractItemModel):
     def headerData(self, section, orientation, role = Qt.DisplayRole):
         if (role == Qt.DisplayRole and orientation == Qt.Horizontal):
             x = section
-            if False:
-                pass
-            elif x==0:
+            if x==0:
                 return self.tr("Stamp")
             elif x==1:
                 return self.tr("Probability")
@@ -155,9 +153,7 @@ class TileStampModel(QAbstractItemModel):
 
             elif (index.column() == 1):   # sum of probabilities
                 x = role
-                if False:
-                    pass
-                elif x==Qt.DisplayRole:
+                if x==Qt.DisplayRole:
                     if (stamp.variations().size() > 1):
                         sum = 0
                         for variation in stamp.variations():

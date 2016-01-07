@@ -749,8 +749,6 @@ class PropertyBrowser(QtTreePropertyBrowser):
                                               val))
 
     def createProperty(self, id, type, name, parent):
-        if name=='colorR':
-            pass
         property = self.mVariantManager.addProperty(type, name)
         if (type == QVariant.Bool):
             property.setAttribute("textVisible", False)

@@ -215,11 +215,13 @@ class StampBrush(AbstractTileTool):
             points = pointsOnLine(self.mPrevTilePosition, pos)
             editedRegion = QRegion()
             
-            for i in range(1, points.size()):
-                self.drawPreviewLayer(QVector(points.at(i)))
+            ptSize = points.size()
+            ptLast = ptSize - 1
+            for i in range(1, ptSize):
+                self.drawPreviewLayer(QVector(points[i]))
 
                 # Only update the brush item for the last drawn piece
-                if i == points.size() - 1:
+                if i == ptLast:
                     self.brushItem().setTileLayer(self.mPreviewLayer)
 
                 editedRegion |= self.doPaint(PaintFlags.Mergeable | PaintFlags.SuppressRegionEdited)

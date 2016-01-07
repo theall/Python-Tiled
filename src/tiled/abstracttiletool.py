@@ -71,12 +71,9 @@ class AbstractTileTool(AbstractTool):
         if layer:
             offsetPos -= layer.offset()
             self.mBrushItem.setLayerOffset(layer.offset())
-        
-        if offsetPos.x() == 32 and offsetPos.y() == 48:
-            pass
+
         renderer = self.mapDocument().renderer()
         tilePosF = renderer.screenToTileCoords_(offsetPos)
-        tilePos = QPoint()
         if (self.mTilePositionMethod == TilePositionMethod.BetweenTiles):
             tilePos = tilePosF.toPoint()
         else:
@@ -86,7 +83,7 @@ class AbstractTileTool(AbstractTool):
             
             self.tilePositionChanged(tilePos)
             self.updateStatusInfo()
-
+        
     def mapDocumentChanged(self, oldDocument, newDocument):
         self.mBrushItem.setMapDocument(newDocument)
 

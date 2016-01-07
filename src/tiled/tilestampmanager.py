@@ -116,6 +116,7 @@ class TileStampManager(QObject):
     def __init__(self, toolManager, parent = None):
         super().__init__(parent)
         
+        self.mStampsByName = QMap()
         self.mQuickStamps = QVector()
         for i in range(TileStampManager.quickStampKeys().__len__()):
             self.mQuickStamps.append(0)
@@ -284,6 +285,3 @@ class TileStampManager(QObject):
     def deleteStamp(self, stamp):
         self.mStampsByName.remove(stamp.name())
         QFile.remove(stampFilePath(stamp.fileName()))
-
-
-    mStampsByName = QMap()
