@@ -60,7 +60,7 @@ class RangeSet():
     ##
     def insert(self, value):
         if (self.mMap.empty()):
-            self.mMap.insert([value, value])
+            self.mMap.insert(value, value)
             return
 
         # We can now assume that 'it' will be at most one end of the range

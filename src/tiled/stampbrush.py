@@ -20,7 +20,7 @@
 ##
 
 from geometry import pointsOnLine, pointsOnEllipse
-from tilestamp import TileStamp, TileStampVariation
+from tilestamp import TileStamp
 from map import Map
 from randompicker import RandomPicker
 from painttilelayer import PaintTileLayer

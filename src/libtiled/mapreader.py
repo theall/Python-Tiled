@@ -730,27 +730,21 @@ class MapReaderPrivate():
     def __readPolygon(self):
         atts = self.xml.attributes()
         points = atts.value("points")
-        pointsList = points.split(' ', QString.SkipEmptyParts)
+        pointsList = list(filter(lambda x:x.strip()!='', points.split(' ')))
         polygon = QPolygonF()
         ok = True
         for point in pointsList:
-            commaPos = point.indexOf(',')
-            if (commaPos == -1):
+            try:
+                x, y = point.split(',')
+            except:
                 ok = False
                 break
             
-            try:
-                x = Float(point.left(commaPos))
-                ok = True
-            except:
-                ok = False
+            x, ok = Float2(x)
             if (not ok):
                 break
-            try:
-                y = point[commaPos + 1]
-                ok = True
-            except:
-                ok = False
+
+            y, ok = Float2(y)
             if (not ok):
                 break
             polygon.append(QPointF(x, y))

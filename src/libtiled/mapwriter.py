@@ -510,14 +510,11 @@ class MapWriterPrivate():
                 w.writeStartElement("polygon")
             else:
                 w.writeStartElement("polyline")
-            points = QString()
+            points = ''
             for point in polygon:
-                points.append(str(point.x()))
-                points.append(',')
-                points.append(str(point.y()))
-                points.append(' ')
+                points += str(point.x()) + ',' + str(point.y()) + ' '
 
-            points.chop(1)
+            points = points[:-1]
             w.writeAttribute("points", points)
             w.writeEndElement()
 
