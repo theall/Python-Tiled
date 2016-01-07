@@ -1,0 +1,106 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'Z:\src\tiled\offsetmapdialog.ui'
+#
+# Created by: PyQt5 UI code generator 5.4.1
+#
+# WARNING! All changes made in this file will be lost!
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+class Ui_OffsetMapDialog(object):
+    def setupUi(self, OffsetMapDialog):
+        OffsetMapDialog.setObjectName("OffsetMapDialog")
+        OffsetMapDialog.setEnabled(True)
+        OffsetMapDialog.resize(238, 212)
+        OffsetMapDialog.setAutoFillBackground(False)
+        self.verticalLayout_5 = QtWidgets.QVBoxLayout(OffsetMapDialog)
+        self.verticalLayout_5.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.offsetGroup = QtWidgets.QGroupBox(OffsetMapDialog)
+        self.offsetGroup.setObjectName("offsetGroup")
+        self.gridLayout = QtWidgets.QGridLayout(self.offsetGroup)
+        self.gridLayout.setObjectName("gridLayout")
+        self.labelX = QtWidgets.QLabel(self.offsetGroup)
+        self.labelX.setObjectName("labelX")
+        self.gridLayout.addWidget(self.labelX, 2, 0, 1, 1)
+        self.xOffset = QtWidgets.QSpinBox(self.offsetGroup)
+        self.xOffset.setEnabled(True)
+        self.xOffset.setMinimum(-999)
+        self.xOffset.setMaximum(999)
+        self.xOffset.setProperty("value", 0)
+        self.xOffset.setObjectName("xOffset")
+        self.gridLayout.addWidget(self.xOffset, 2, 2, 1, 1)
+        self.wrapX = QtWidgets.QCheckBox(self.offsetGroup)
+        self.wrapX.setObjectName("wrapX")
+        self.gridLayout.addWidget(self.wrapX, 2, 3, 1, 1)
+        self.labelY = QtWidgets.QLabel(self.offsetGroup)
+        self.labelY.setObjectName("labelY")
+        self.gridLayout.addWidget(self.labelY, 4, 0, 1, 1)
+        spacerItem = QtWidgets.QSpacerItem(10, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        self.gridLayout.addItem(spacerItem, 4, 1, 1, 1)
+        self.yOffset = QtWidgets.QSpinBox(self.offsetGroup)
+        self.yOffset.setMinimum(-999)
+        self.yOffset.setMaximum(999)
+        self.yOffset.setProperty("value", 0)
+        self.yOffset.setObjectName("yOffset")
+        self.gridLayout.addWidget(self.yOffset, 4, 2, 1, 1)
+        self.wrapY = QtWidgets.QCheckBox(self.offsetGroup)
+        self.wrapY.setObjectName("wrapY")
+        self.gridLayout.addWidget(self.wrapY, 4, 3, 1, 1)
+        self.labelLayers = QtWidgets.QLabel(self.offsetGroup)
+        self.labelLayers.setObjectName("labelLayers")
+        self.gridLayout.addWidget(self.labelLayers, 5, 0, 1, 1)
+        self.layerSelection = QtWidgets.QComboBox(self.offsetGroup)
+        self.layerSelection.setObjectName("layerSelection")
+        self.layerSelection.addItem("")
+        self.layerSelection.addItem("")
+        self.layerSelection.addItem("")
+        self.gridLayout.addWidget(self.layerSelection, 5, 2, 1, 2)
+        self.labelBounds = QtWidgets.QLabel(self.offsetGroup)
+        self.labelBounds.setObjectName("labelBounds")
+        self.gridLayout.addWidget(self.labelBounds, 6, 0, 1, 1)
+        self.boundsSelection = QtWidgets.QComboBox(self.offsetGroup)
+        self.boundsSelection.setObjectName("boundsSelection")
+        self.boundsSelection.addItem("")
+        self.boundsSelection.addItem("")
+        self.gridLayout.addWidget(self.boundsSelection, 6, 2, 1, 2)
+        self.verticalLayout_5.addWidget(self.offsetGroup)
+        spacerItem1 = QtWidgets.QSpacerItem(20, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.verticalLayout_5.addItem(spacerItem1)
+        self.buttonBox = QtWidgets.QDialogButtonBox(OffsetMapDialog)
+        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setObjectName("buttonBox")
+        self.verticalLayout_5.addWidget(self.buttonBox)
+
+        self.retranslateUi(OffsetMapDialog)
+        self.buttonBox.accepted.connect(OffsetMapDialog.accept)
+        self.buttonBox.rejected.connect(OffsetMapDialog.reject)
+        QtCore.QMetaObject.connectSlotsByName(OffsetMapDialog)
+
+    def retranslateUi(self, OffsetMapDialog):
+        _translate = QtCore.QCoreApplication.translate
+        OffsetMapDialog.setWindowTitle(_translate("OffsetMapDialog", "Offset Map"))
+        self.offsetGroup.setTitle(_translate("OffsetMapDialog", "Offset Contents of Map"))
+        self.labelX.setText(_translate("OffsetMapDialog", "X:"))
+        self.wrapX.setText(_translate("OffsetMapDialog", "Wrap"))
+        self.labelY.setText(_translate("OffsetMapDialog", "Y:"))
+        self.wrapY.setText(_translate("OffsetMapDialog", "Wrap"))
+        self.labelLayers.setText(_translate("OffsetMapDialog", "Layers:"))
+        self.layerSelection.setItemText(0, _translate("OffsetMapDialog", "All Visible Layers"))
+        self.layerSelection.setItemText(1, _translate("OffsetMapDialog", "All Layers"))
+        self.layerSelection.setItemText(2, _translate("OffsetMapDialog", "Selected Layer"))
+        self.labelBounds.setText(_translate("OffsetMapDialog", "Bounds:"))
+        self.boundsSelection.setItemText(0, _translate("OffsetMapDialog", "Whole Map"))
+        self.boundsSelection.setItemText(1, _translate("OffsetMapDialog", "Current Selection"))
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    OffsetMapDialog = QtWidgets.QDialog()
+    ui = Ui_OffsetMapDialog()
+    ui.setupUi(OffsetMapDialog)
+    OffsetMapDialog.show()
+    sys.exit(app.exec_())
+
