@@ -183,7 +183,7 @@ class MapWriterPrivate():
 
         self.mMapDir = QDir()
         self.mGidMapper = GidMapper()
-        self.mError = QString()
+        self.mError = ''
 
     def writeMap(self, map, device, path):
         self.mMapDir = QDir(path)

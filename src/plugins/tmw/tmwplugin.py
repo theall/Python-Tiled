@@ -18,20 +18,18 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from mapwriterinterface import MapWriterInterface
-from pyqtcore import (
-    QString
-)
+from mapformat import WritableMapFormat
 from PyQt5.QtCore import (
     QDataStream,
-    QObject,
     QFile,
     Qt,
     QIODevice
 )
-class TmwPlugin(QObject, MapWriterInterface):
+class TmwPlugin(WritableMapFormat):
     def __init__(self):
-        self.mError = QString()
+        super().__init__()
+        
+        self.mError = ''
 
     # MapWriterInterface
     def write(self, map, fileName):

@@ -4,6 +4,7 @@ sys.path.append('libtiled')
 sys.path.append('QtProperty')
 sys.path.append('libqt5')
 sys.path.append('tiled')
+sys.path.append('plugins')
 
 from tiled.main import main
 

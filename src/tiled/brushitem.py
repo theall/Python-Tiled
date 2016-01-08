@@ -19,7 +19,6 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from tilelayer import TileLayer
 from PyQt5.QtWidgets import (
     QGraphicsItem,
     QApplication

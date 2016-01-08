@@ -33,7 +33,7 @@ from mapformat import FileFormat
 def readTileset(fileName):
     error = ''
     # Try the first registered tileset format that claims to support the file
-    for format in PluginManager.objects():
+    for format in PluginManager.objects(TilesetFormat):
         if format.supportsFile(fileName):
             tileset = format.read(fileName)
             if (error):

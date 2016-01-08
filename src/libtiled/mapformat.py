@@ -1,7 +1,6 @@
 ##
 # mapformat.py
 # Copyright 2008-2015, Thorbjørn Lindeijer <bjorn@lindeijer.nl>
-# Copyright 2015-2016, Bilge Theall <bilge.theall@gmail.com.cn>
 #
 # This file is part of libtiled.
 #
@@ -113,6 +112,9 @@ class MapFormat(FileFormat):
 ##
 class ReadableMapFormat(MapFormat):
 
+    def __init__(self):
+        super().__init__()
+        
     def capabilities(self):
         return FileFormat.Read
         
@@ -123,6 +125,9 @@ class ReadableMapFormat(MapFormat):
 # Convenience class for adding a format that can only be written.
 ##
 class WritableMapFormat(MapFormat):
+    
+    def __init__(self):
+        super().__init__()
     
     def capabilities(self):
         return FileFormat.Write
@@ -143,7 +148,7 @@ class FormatHelper():
         self.mFormats = QList()
         self.mFormatByNameFilter = QMap()
         
-        def t(self, capabilities, format):
+        def t(self, format):
             if (format.hasCapabilities(capabilities)):
                 nameFilter = format.nameFilter()
                 self.mFilter += ";;"
@@ -151,7 +156,7 @@ class FormatHelper():
                 self.mFormats.append(format)
                 self.mFormatByNameFilter.insert(nameFilter, format)
         
-        PluginManager.each(t)
+        PluginManager.each(self, t)
     
     def filter(self):
         return self.mFilter

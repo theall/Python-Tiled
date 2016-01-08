@@ -18,9 +18,9 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from math import math
+import math
 from properties import Properties
-from mapwriterinterface import MapWriterInterface
+from mapformat import WritableMapFormat
 from pyqtcore import (
     QList,
     QString,
@@ -31,15 +31,17 @@ from PyQt5.QtCore import (
     QFile,
     Qt,
     QIODevice,
-    QTextStream,
-    QObject
+    QTextStream
 )
 # ASCII characters between decimals 32 and 126 should be ok
 ASCII_MIN = 32
 ASCII_MAX = 126
-class TenginePlugin(QObject, MapWriterInterface):
+
+class TenginePlugin(WritableMapFormat):
     def __init__(self):
-        self.mError = QString()
+        super().__init__()
+        
+        self.mError = ''
 
     # MapWriterInterface
     def write(self, map, fileName):

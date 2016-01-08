@@ -141,7 +141,7 @@ class MapsView(QTreeView):
         # The file system model name filters are plain, whereas the plugins expose
         # a filter as part of the file description
         filterFinder = QRegExp("\\((\\*\\.[^\\)\\s]*)")
-        for format in PluginManager.objects():
+        for format in PluginManager.objects(MapFormat):
             if not (format.capabilities() & MapFormat.Read):
                 continue
 

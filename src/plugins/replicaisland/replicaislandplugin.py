@@ -22,8 +22,7 @@
 from tiled_global import Int2
 from tilelayer import TileLayer, Cell
 from tileset import Tileset
-from mapreaderinterface import MapReaderInterface
-from mapwriterinterface import MapWriterInterface
+from mapformat import MapFormat
 from map import Map
 from pyqtcore import (
     QList,
@@ -35,8 +34,7 @@ from PyQt5.QtCore import (
     QFileInfo,
     QFile,
     QTemporaryFile,
-    QIODevice,
-    QObject
+    QIODevice
 )
 from PyQt5.QtGui import (
     QImage
@@ -45,13 +43,15 @@ from PyQt5.QtGui import (
 # Read and write maps in Replica Island format.  Replica Island is an
 # open source side-scrolling video game for Android.
 ##
-class ReplicaIslandPlugin(QObject, MapWriterInterface, MapReaderInterface):
+class ReplicaIslandPlugin(MapFormat):
 
     ##
     # Create an instance of the plugin.
     ##
     def __init__(self):
-        self.mError = QString()
+        super().__init__()
+        
+        self.mError = ''
 
     # MapReaderInterface
     def read(self, fileName):

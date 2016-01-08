@@ -21,7 +21,8 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-import sys
+
+import re, sys
 from utils import Utils
 from tilelayer import TileLayer
 from mapdocument import MapDocument
@@ -90,7 +91,6 @@ from PyQt5.QtCore import (
     QEvent,
     QFileInfo,
     QSignalMapper,
-    QRegExp,
     QByteArray,
     QSettings
 )
@@ -714,19 +714,23 @@ class MainWindow(QMainWindow):
         helper = FormatHelper(FileFormat.Write, self.tr("All Files (*)"))
 
         prefs = Preferences.instance()
-        selectedFilter = self.mSettings.value("lastUsedExportFilter")
+        selectedFilter = self.mSettings.value("lastUsedExportFilter", '')
         suggestedFilename = self.mMapDocument.lastExportFileName()
         if suggestedFilename == '':
             baseNameInfo = QFileInfo(self.mMapDocument.fileName())
             baseName = baseNameInfo.baseName()
-            extensionFinder = QRegExp("\\(\\*\\.([^\\)\\s]*)")
-            extensionFinder.indexIn(selectedFilter)
-            extension = extensionFinder.cap(1)
+            extensionFinder = re.search("\(\*\.([^\)\s]*)", selectedFilter)
+            if extensionFinder:
+                extension = extensionFinder.group(1)
+            else:
+                extension = ''
             lastExportedFilePath = prefs.lastPath(Preferences.ExportedFile)
-            suggestedFilename = lastExportedFilePath + "/" + baseName + '.' + extension
+            suggestedFilename = lastExportedFilePath + "/" + baseName
+            if extension != '':
+                suggestedFilename += '.' + extension
 
         # No need to confirm overwrite here since it'll be prompted below
-        fileName, _ = QFileDialog.getSaveFileName(self, self.tr("Export As..."),
+        fileName, selectedFilter = QFileDialog.getSaveFileName(self, self.tr("Export As..."),
                                                         suggestedFilename,
                                                         helper.filter(), selectedFilter, QFileDialog.DontConfirmOverwrite)
         if fileName == '':
@@ -740,7 +744,7 @@ class MainWindow(QMainWindow):
         if (not chosenFormat and suffix!=''):
             suffix = "*." + suffix
             for format in helper.formats():
-                if format.nameFilter().lower().contains(suffix.lower()):
+                if suffix.lower() in format.nameFilter().lower():
                     if chosenFormat:
                         QMessageBox.warning(self, self.tr("Non-unique file extension"),
                                              self.tr("Non-unique file extension.\n"
@@ -763,7 +767,7 @@ class MainWindow(QMainWindow):
         # could save to multiple files at the same time. For example CSV saves
         # each layer into a separate file.
         outputFiles = chosenFormat.outputFiles(self.mMapDocument.map(), fileName)
-        if (outputFiles.size() > 0):
+        if len(outputFiles) > 0:
             # Check if any output file already exists
             message = self.tr("Some export files already exist:") + "\n\n"
 

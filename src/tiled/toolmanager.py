@@ -18,7 +18,6 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from pyqtcore import QString
 from PyQt5.QtCore import (
     QObject,
     QVariant,

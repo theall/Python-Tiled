@@ -1,6 +1,5 @@
 ##
 # CSV Tiled Plugin
-# Copyrigpyt 2014, Bilge Theall <bilge.theall@gmail.com.cn>
 # Copyrigpyt 2014, Thorbjørn Lindeijer <thorbjorn@lindeijer.nl>
 #
 # This file is part of Tiled.
@@ -20,21 +19,21 @@
 ##
 
 from layer import Layer
-from mapwriterinterface import MapWriterInterface
-from pyqtcore import (
-    QString
-)
+from mapformat import WritableMapFormat
 from PyQt5.QtCore import (
     QByteArray,
     QFile,
-    QObject,
+    QDir, 
+    QFileInfo, 
     QIODevice,
     QSaveFile
 )
 
-class CsvPlugin(QObject, MapWriterInterface):
+class CsvPlugin(WritableMapFormat):
     def __init__(self):
-        self.mError = QString()
+        super().__init__()
+        
+        self.mError = ''
 
     # MapWriterInterface
     def write(self, map, fileName):
@@ -58,16 +57,19 @@ class CsvPlugin(QObject, MapWriterInterface):
         for y in range(0, tileLayer.height()):
             for x in range(0, tileLayer.width()):
                 if (x > 0):
-                    file.write(",", 1)
+                    file.write(",")
                 cell = tileLayer.cellAt(x, y)
                 tile = cell.tile
                 if (tile and tile.hasProperty("name")) :
                     file.write(tile.property("name").toUtf8())
-                else :
-                    pass#id = tile ? tile.id() : -1
+                else:
+                    if tile:
+                        id = tile.id()
+                    else:
+                        id = -1
                     file.write(QByteArray.number(id))
 
-            file.write("\n", 1)
+            file.write("\n")
         
         if (file.error() != QFile.NoError) :
             self.mError = file.errorString()
@@ -84,3 +86,30 @@ class CsvPlugin(QObject, MapWriterInterface):
     
     def errorString(self):
         return self.mError
+
+    def outputFiles(self, map, fileName):
+        result = []
+
+        # Extract file name without extension and path
+        fileInfo = QFileInfo(fileName)
+        base = fileInfo.completeBaseName() + "_"
+        path = fileInfo.path()
+
+        # Loop layers to calculate the path for the exported file
+        for layer in map.layers():
+            if layer.layerType() != Layer.TileLayerType:
+                continue
+
+            # Get the output file name for this layer
+            layerName = layer.name()
+            layerFileName = base + layerName + ".csv"
+            layerFilePath = QDir(path).filePath(layerFileName)
+
+            result.append(layerFilePath)
+
+        # If there was only one tile layer, there's no need to change the name
+        # (also keeps behavior backwards compatible)
+        if len(result) == 1:
+            result[0] = fileName
+
+        return result

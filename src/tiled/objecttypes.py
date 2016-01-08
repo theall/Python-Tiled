@@ -43,7 +43,7 @@ class ObjectType():
 
 class ObjectTypesWriter():
     def __init__(self):
-        self.mError = QString()
+        self.mError = ''
 
     def writeObjectTypes(self, fileName, objectTypes):
         self.mError = ''
@@ -77,7 +77,7 @@ class ObjectTypesWriter():
 
 class ObjectTypesReader():
     def __init__(self):
-        self.mError = QString()
+        self.mError = ''
 
     def readObjectTypes(self, fileName):
         self.mError = ''

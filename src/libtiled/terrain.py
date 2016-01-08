@@ -95,7 +95,10 @@ class Terrain(Object):
     # Returns a Tile that represents this terrain type in the terrain palette.
     ##
     def imageTile(self):
-        pass#return self.mImageTileId >= 0 ? self.mTileset.tileAt(self.mImageTileId) : 0
+        if self.mImageTileId >= 0:
+            return self.mTileset.tileAt(self.mImageTileId)
+        return 0
+        
     ##
     # Returns the transition penalty(/distance) from this terrain type to another terrain type.
     ##

@@ -18,38 +18,21 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from pyqtcore import (
-    QChar,
-    QuotedKeyAndValue,
-    QString,
-    Quotes,
-    QLatin
-)
 from PyQt5.QtCore import (
-    QByteArray,
-    QIODevice
+    QByteArray
 )
 ##
 # Makes it easy to produce a well formatted Lua table.
 ##
 class LuaTableWriter():
-
     def __init__(self, device):
-        super().__init__.m_device(device)
-        self.m_indent(0)
-        self.m_valueSeparator(',')
-        self.m_suppressNewlines(False)
-        self.m_newLine(True)
-        self.m_valueWritten(False)
-        self.m_error(False)
-
         self.m_valueWritten = False
-        self.m_valueSeparator = char()
-        self.m_device = None
+        self.m_valueSeparator = ','
+        self.m_device = device
         self.m_suppressNewlines = False
         self.m_indent = 0
         self.m_error = False
-        self.m_newLine = False
+        self.m_newLine = True
 
     def writeStartDocument(self):
         pass
@@ -57,35 +40,25 @@ class LuaTableWriter():
     def writeEndDocument(self):
         self.write('\n')
     
-    def writeStartTable(self):
-        self.prepareNewLine()
-        self.write('{')
-        self.m_indent += 1
-        self.m_newLine = False
-        self.m_valueWritten = False
-
-        self.prepareNewLine()
-        self.write(name + " = {")
-        self.m_indent += 1
-        self.m_newLine = False
-        self.m_valueWritten = False
+    def writeStartTable(self, *args):
+        l = len(args)
+        if l==0:
+            self.prepareNewLine()
+            self.write('{')
+            self.m_indent += 1
+            self.m_newLine = False
+            self.m_valueWritten = False
+        elif l==1:
+            name = args[0]
+            self.prepareNewLine()
+            self.write(name + " = {")
+            self.m_indent += 1
+            self.m_newLine = False
+            self.m_valueWritten = False
     
     def writeStartReturnTable(self):
         self.prepareNewLine()
         self.write("return {")
-        self.m_indent += 1
-        self.m_newLine = False
-        self.m_valueWritten = False
-    
-    def writeStartTable(self, name):
-        self.prepareNewLine()
-        self.write('{')
-        self.m_indent += 1
-        self.m_newLine = False
-        self.m_valueWritten = False
-
-        self.prepareNewLine()
-        self.write(name + " = {")
         self.m_indent += 1
         self.m_newLine = False
         self.m_valueWritten = False
@@ -99,32 +72,62 @@ class LuaTableWriter():
         self.m_valueWritten = True
     
     def writeValue(self, value):
-        self.writeUnquotedValue(QByteArray.number(value))
-    def writeValue(self, value):
-        self.writeUnquotedValue(QByteArray.number(value))
-    def writeValue(self,value):
-        self.writeUnquotedValue(quote(value).toUtf8())
+        tp = type(value)
+        if tp==int:
+            self.writeUnquotedValue(QByteArray.number(value))
+        elif tp==str:
+            self.writeUnquotedValue(self.quote(value).toUtf8())
+        elif tp==QByteArray:
+            self.prepareNewValue()
+            self.write('"')
+            self.write(value)
+            self.write('"')
+            self.m_newLine = False
+            self.m_valueWritten = True
+
     def writeKeyAndValue(self, key, value):
-        self.writeKeyAndUnquotedValue(key, QByteArray.number(value))
-    def writeKeyAndValue(self, key, value):
-        self.writeKeyAndUnquotedValue(key, QByteArray.number(value))
-    def writeKeyAndValue(self, key, value):
-        self.writeKeyAndUnquotedValue(key, QByteArray.number(value))
-    def writeKeyAndValue(self, key, value):
-        if value:
-            v = "True"
-        else:
-            v = "False"
-        self.writeKeyAndUnquotedValue(key, v)
-        
-    def writeKeyAndValue(self, key, value):
-        self.writeKeyAndUnquotedValue(key, self.quote(value).toUtf8())
-    def write(self, bytes):
-        self.write(bytes, qstrlen(bytes))
-    def write(self, bytes):
-        self.write(bytes.constData(), bytes.length())
-    def write(self, c):
-        self.write(c, 1)
+        tp = type(value)
+        if tp==int or tp==float:
+            self.writeKeyAndUnquotedValue(key, QByteArray.number(value))
+        elif tp==bool:
+            if value:
+                v = "True"
+            else:
+                v = "False"
+            self.writeKeyAndUnquotedValue(key, v)
+        elif tp==str:
+            self.writeKeyAndUnquotedValue(key, self.quote(value).toUtf8())
+
+    def writeQuotedKeyAndValue(self, key, value):
+        self.prepareNewLine()
+        self.write('[')
+        self.write(self.quote(key).toUtf8())
+        self.write("] = ")
+        self.write(self.quote(value).toUtf8())
+        self.m_newLine = False
+        self.m_valueWritten = True
+
+    def writeKeyAndUnquotedValue(self, key, value):
+        self.prepareNewLine()
+        self.write(key)
+        self.write(" = ")
+        self.write(value)
+        self.m_newLine = False
+        self.m_valueWritten = True
+
+    def write(self, *args):
+        l = len(args)
+        if l==1:
+            arg1 = args[0]
+            tp = type(arg1)
+            if tp==str or tp==bytes:
+                self.write(arg1, len(arg1))
+            elif tp==QByteArray:
+                self.write(arg1.data(), arg1.length())
+        elif l==2:
+            bytes, length = args
+            if self.m_device.write(bytes, length) != length:
+                self.m_error = True
 
     ##
     # Sets whether newlines should be suppressed. While newlines are suppressed,
@@ -136,39 +139,55 @@ class LuaTableWriter():
     def suppressNewlines(self):
         return self.m_suppressNewlines
 
-    def writeValue(self, value):
-        self.prepareNewValue()
-        self.write('"')
-        self.write(value)
-        self.write('"')
-        self.m_newLine = False
-        self.m_valueWritten = True
-    
-    def writeValue(self, value):
-        self.writeUnquotedValue(QByteArray.number(value))
+    ##
+    # Quotes the given string, escaping special characters as necessary.
+    ##
+    def quote(self, s):
+
+        quoted = "\""
+        for i in range(0, s.length()):
+            c = s[i]
+            x = c.unicode()
+            if False:
+                pass
+            elif x=='\\':
+                quoted.append("\\\\")
+                break
+            elif x=='"':
+                quoted.append("\\\"")
+                break
+            elif x=='\n':
+                quoted.append("\\n")
+                break
+            else:
+                quoted.append(c)
+
+        quoted.append('"')
+        return quoted
+
+    def prepareNewLine(self):
+        if self.m_valueWritten:
+            self.write(self.m_valueSeparator)
+            self.m_valueWritten = False
         
-    def writeValue(self, value):
-        self.writeUnquotedValue(QByteArray.number(value))
-    def writeValue(self, value):
-        self.writeUnquotedValue(quote(value).toUtf8())
-    def writeKeyAndValue(self, key, value):
-        self.writeKeyAndUnquotedValue(key, QByteArray.number(value))
-    def writeKeyAndValue(self, key, value):
-        self.writeKeyAndUnquotedValue(key, QByteArray.number(value))
-    def writeKeyAndValue(self, key, value):
-        self.writeKeyAndUnquotedValue(key, QByteArray.number(value))
-    def writeKeyAndValue(self, key, value):
-        if value:
-            v = "True"
+        self.writeNewline()
+
+    def prepareNewValue(self):
+        if (not self.m_valueWritten):
+            self.writeNewline()
         else:
-            v = "False"
-        self.writeKeyAndUnquotedValue(key, v)
-        
-    def writeKeyAndValue(self, key, value):
-        self.writeKeyAndUnquotedValue(key, self.quote(value).toUtf8())
-    def write(self, bytes):
-        self.write(bytes, qstrlen(bytes))
-    def write(self, bytes):
-        self.write(bytes.constData(), bytes.length())
-    def write(self, c):
-        self.write(c, 1)
+            self.write(self.m_valueSeparator)
+            self.write(' ')
+
+    def writeIndent(self):
+        for level in range(self.m_indent, -1, -1):
+            self.write("  ")
+
+    def writeNewline(self):
+        if (not  self.m_newLine):
+            if ( self.m_suppressNewlines):
+                 self.write(' ')
+            else:
+                 self.write('\n')
+                 self.writeIndent()
+            self.m_newLine = True

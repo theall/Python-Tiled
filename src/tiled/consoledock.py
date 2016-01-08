@@ -47,7 +47,7 @@ class ConsoleDock(QDockWidget):
                                 ))
         layout.addWidget(self.plainTextEdit)
         
-        for output in PluginManager.objects():
+        for output in PluginManager.objects(LoggingInterface):
             self.registerOutput(output)
 
         PluginManager.instance().objectAdded.connect(self.onObjectAdded)

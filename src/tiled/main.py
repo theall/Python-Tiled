@@ -94,7 +94,7 @@ class CommandLineHandler(CommandLineParser):
         PluginManager.instance().loadPlugins()
 
         qWarning(self.tr("Export formats:"))
-        formats = PluginManager.objects()
+        formats = PluginManager.objects(MapFormat)
         for format in formats:
             if format.hasCapabilities(MapFormat.Write):
                 qWarning(" " + format.nameFilter())
@@ -159,7 +159,7 @@ def main(argv):
         index += 1
         
         chosenFormat = None
-        formats = PluginManager.objects()
+        formats = PluginManager.objects(MapFormat)
 
         if filter:
             # Find the map format supporting the given filter

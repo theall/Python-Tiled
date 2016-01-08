@@ -27,7 +27,6 @@
 ##
 
 from pyqtcore import (
-    QString,
     QStringList
 )
 ##
@@ -71,4 +70,4 @@ class MapWriterInterface():
     # name filter.
     ##
     def nameFilter(self):
-        return QString()
+        return ''

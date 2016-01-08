@@ -441,7 +441,7 @@ class MapReaderPrivate():
             if (self.xml.name() == "terrain"):
                 atts = self.xml.attributes()
                 name = atts.value("name")
-                tile = atts.value("tile")
+                tile = Int(atts.value("tile"))
                 terrain = tileset.addTerrain(name, tile)
                 while (self.xml.readNextStartElement()):
                     if (self.xml.name() == "properties"):

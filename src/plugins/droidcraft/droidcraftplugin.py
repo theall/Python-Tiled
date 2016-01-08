@@ -1,6 +1,5 @@
 ##
 # Droidcraft Tiled Plugin
-# Copyrigpyt 2011, Bilge Theall <bilge.theall@gmail.com.cn>
 # Copyrigpyt 2011, seeseekey <seeseekey@googlemail.com>
 #
 # This file is part of Tiled.
@@ -22,26 +21,22 @@
 from compression import compress, decompress, CompressionMethod
 from tilelayer import TileLayer, Cell
 from tileset import Tileset
-from tile import Tile
 from map import Map
-from mapreaderinterface import MapReaderInterface
-from mapwriterinterface import MapWriterInterface
-from pyqtcore import (
-    QString
-)
+from mapformat import MapFormat
 from PyQt5.QtCore import (
     QFileInfo,
     QIODevice,
-    QObject,
     QFile,
     QByteArray
 )
 from PyQt5.QtGui import (
     QImage
 )
-class DroidcraftPlugin(QObject, MapWriterInterface, MapReaderInterface):
+class DroidcraftPlugin(MapFormat):
     def __init__(self):
-        self.mError = QString()
+        super().__init__()
+        
+        self.mError = ''
 
     # MapReaderInterface
     # Reader

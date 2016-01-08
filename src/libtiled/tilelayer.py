@@ -27,7 +27,6 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 
-from tileset import Tileset
 from libtiled.tiled import FlipDirection, RotateDirection
 from layer import Layer
 from pyqtcore import QSet, QString, QVector

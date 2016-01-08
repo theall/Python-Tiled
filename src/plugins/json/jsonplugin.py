@@ -19,29 +19,25 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-
 import json
 from varianttomapconverter import VariantToMapConverter
 from maptovariantconverter import MapToVariantConverter
-from mapreaderinterface import MapReaderInterface
-from mapwriterinterface import MapWriterInterface
+from plugin import Plugin
 from pyqtcore import (
-    QStringList,
-    QString
+    QStringList
 )
 from PyQt5.QtCore import (
     Qt,
     QIODevice,
     QSaveFile,
     QFileInfo,
-    QObject,
     QTextStream,
     QFile
 )   
     
-class JsonPlugin(QObject, MapReaderInterface, MapWriterInterface):
+class JsonPlugin(Plugin):
     def __init__(self):
-        self.mError = QString()
+        self.mError = ''
 
         # MapReaderInterface
     def read(self, fileName):
@@ -86,8 +82,10 @@ class JsonPlugin(QObject, MapReaderInterface, MapWriterInterface):
         
         converter = MapToVariantConverter()
         variant = converter.toVariant(map, QFileInfo(fileName).dir())
+        
+        writer = json
         writer.setAutoFormatting(True)
-        if (not writer.stringify(variant)) :
+        if (not writer.dumps(variant)) :
             # This can only happen due to coding error
             self.mError = writer.errorString()
             return False
@@ -96,7 +94,7 @@ class JsonPlugin(QObject, MapReaderInterface, MapWriterInterface):
         isJsFile = fileName.endsWith(".js")
         if (isJsFile) :
             # Trim and escape name
-            nameWriter = JsonWriter()
+            nameWriter = json
             baseName = QFileInfo(fileName).baseName()
             nameWriter.stringify(baseName)
             out.write("(function(name,data){\n if(typeof onTileMapLoaded === 'undefined'):\n")

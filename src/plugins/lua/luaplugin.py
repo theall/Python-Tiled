@@ -18,81 +18,62 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-
-from tileset import tileset
-from tilelayer import tilelayer
-from tile import tile
-from terrain import terrain
-from properties import properties
-from objectgroup import objectgroup
-from mapobject import mapobject
-from map import Map
-from imagelayer import imagelayer
-from luatablewriter import luatablewriter
-from mapwriterinterface import MapWriterInterface
+from layer import Layer
+from mapobject import MapObject
 from gidmapper import GidMapper
-from lua_global import lua_global
+from map import Map, orientationToString, staggerAxisToString, staggerIndexToString
+from lua.luatablewriter import LuaTableWriter
+from mapformat import WritableMapFormat
 from pyqtcore import (
-    QuotedKeyAndValue,
-    QVector,
     QString
 )
 from PyQt5.QtCore import (
     QFile,
-    QPointF,
     QSaveFile,
     QFileInfo,
-    QSize,
     QCoreApplication,
-    QObject,
-    QByteArray,
     QIODevice,
-    QPoint,
     QDir
 )
-from PyQt5.QtGui import (
-    QPolygonF,
-    QColor
-)
+
+POLYGON_FORMAT_FULL = True
+POLYGON_FORMAT_PAIRS = False
+POLYGON_FORMAT_OPTIMAL = False
+
 ##
 # This plugin allows exporting maps as Lua files.
 ##
-class LuaPlugin(QObject, MapWriterInterface):
+class LuaPlugin(WritableMapFormat):
     def __init__(self):
+        super().__init__()
+
         self.mMapDir = QDir()
-        self.mError = QString()
-        self.mGidMapper = super().GidMapper()
+        self.mError = ''
+        self.mGidMapper = GidMapper()
 
     # MapWriterInterface
     def write(self, map, fileName):
-    #ifdef HAS_QSAVEFILE_SUPPORT
-        fil = QSaveFile(efileName)
-    #else
-        fil = QFile(efileName)
-    #endif
+        file = QSaveFile(fileName)
         if (not file.open(QIODevice.WriteOnly | QIODevice.Text)) :
-            self.mError = tr("Could not open file for writing.")
-            return false
+            self.mError = self.tr("Could not open file for writing.")
+            return False
         
         self.mMapDir = QFileInfo(fileName).path()
-        write = LuaTableWriter(r&file)
+        writer = LuaTableWriter(file)
         writer.writeStartDocument()
         self.writeMap(writer, map)
         writer.writeEndDocument()
         if (file.error() != QFile.NoError) :
             self.mError = file.errorString()
-            return false
+            return False
         
-    #ifdef HAS_QSAVEFILE_SUPPORT
         if (not file.commit()) :
             self.mError = file.errorString()
-            return false
-        
-    #endif
-        return true
+            return False
+        return True
     
     def nameFilter(self):
-        return tr("Lua files (*.lua)")
+        return self.tr("Lua files (*.lua)")
     
     def errorString(self):
         return self.mError
@@ -121,14 +102,14 @@ class LuaPlugin(QObject, MapWriterInterface):
         if (backgroundColor.isValid()) :
             # Example: backgroundcolor = { 255, 200, 100 }
             writer.writeStartTable("backgroundcolor")
-            writer.setSuppressNewlines(true)
+            writer.setSuppressNewlines(True)
             writer.writeValue(backgroundColor.red())
             writer.writeValue(backgroundColor.green())
             writer.writeValue(backgroundColor.blue())
             if (backgroundColor.alpha() != 255):
                 writer.writeValue(backgroundColor.alpha())
             writer.writeEndTable()
-            writer.setSuppressNewlines(false)
+            writer.setSuppressNewlines(False)
         
         self.writeProperties(writer, map.properties())
         writer.writeStartTable("tilesets")
@@ -143,17 +124,12 @@ class LuaPlugin(QObject, MapWriterInterface):
         writer.writeStartTable("layers")
         for layer in map.layers():
             x = layer.layerType()
-            if False:
-                pass
-            elif x==Layer.TileLayerType:
-                self.writeTileLayer(writer, static_cast(layer))
-                break
+            if x==Layer.TileLayerType:
+                self.writeTileLayer(writer, layer)
             elif x==Layer.ObjectGroupType:
-                self.writeObjectGroup(writer, static_cast(layer))
-                break
+                self.writeObjectGroup(writer, layer)
             elif x==Layer.ImageLayerType:
-                self.writeImageLayer(writer, static_cast(layer))
-                break
+                self.writeImageLayer(writer, layer)
 
         writer.writeEndTable()
         writer.writeEndTable()
@@ -188,7 +164,7 @@ class LuaPlugin(QObject, MapWriterInterface):
         if (tileset.transparentColor().isValid()) :
             writer.writeKeyAndValue("transparentcolor",
                                     tileset.transparentColor().name())
-        
+
         offset = tileset.tileOffset()
         writer.writeStartTable("tileoffset")
         writer.writeKeyAndValue("x", offset.x())
@@ -226,11 +202,11 @@ class LuaPlugin(QObject, MapWriterInterface):
             terrain = tile.terrain()
             if (terrain != 0xFFFFFFFF) :
                 writer.writeStartTable("terrain")
-                writer.setSuppressNewlines(true)
+                writer.setSuppressNewlines(True)
                 for i in range(0, 4):
                     writer.writeValue(tile.cornerTerrainId(i))
                 writer.writeEndTable()
-                writer.setSuppressNewlines(false)
+                writer.setSuppressNewlines(False)
             
             if (tile.probability() != 1.0):
                 writer.writeKeyAndValue("probability", tile.probability())
@@ -275,7 +251,7 @@ class LuaPlugin(QObject, MapWriterInterface):
         writer.writeEndTable()
         writer.writeEndTable()
     
-    def writeObjectGroup(self, ):
+    def writeObjectGroup(self, writer, objectGroup, key):
         if (key.isEmpty()):
             writer.writeStartTable()
         else:
@@ -340,11 +316,11 @@ class LuaPlugin(QObject, MapWriterInterface):
             ##
             for point in polygon:
                 writer.writeStartTable()
-                writer.setSuppressNewlines(true)
+                writer.setSuppressNewlines(True)
                 writer.writeKeyAndValue("x", point.x())
                 writer.writeKeyAndValue("y", point.y())
                 writer.writeEndTable()
-                writer.setSuppressNewlines(false)
+                writer.setSuppressNewlines(False)
             
     #elif defined(POLYGON_FORMAT_PAIRS)
             ## This is an alternative that takes about 25% less memory.
@@ -358,11 +334,11 @@ class LuaPlugin(QObject, MapWriterInterface):
             ##
             for point in polygon:
                 writer.writeStartTable()
-                writer.setSuppressNewlines(true)
+                writer.setSuppressNewlines(True)
                 writer.writeValue(point.x())
                 writer.writeValue(point.y())
                 writer.writeEndTable()
-                writer.setSuppressNewlines(false)
+                writer.setSuppressNewlines(False)
             
     #elif defined(POLYGON_FORMAT_OPTIMAL)
             ## Writing it out in two tables, one for the x coordinates and one for
@@ -373,17 +349,17 @@ class LuaPlugin(QObject, MapWriterInterface):
             # y = { 1, 2, 3, ... }
             ##
             writer.writeStartTable("x")
-            writer.setSuppressNewlines(true)
+            writer.setSuppressNewlines(True)
             for point in polygon:
                 writer.writeValue(point.x())
             writer.writeEndTable()
-            writer.setSuppressNewlines(false)
+            writer.setSuppressNewlines(False)
             writer.writeStartTable("y")
-            writer.setSuppressNewlines(true)
+            writer.setSuppressNewlines(True)
             for point in polygon:
                 writer.writeValue(point.y())
             writer.writeEndTable()
-            writer.setSuppressNewlines(false)
+            writer.setSuppressNewlines(False)
     #endif
             writer.writeEndTable()
         
@@ -392,24 +368,22 @@ class LuaPlugin(QObject, MapWriterInterface):
 
 def includeTile(tile):
     if (not tile.properties().isEmpty()):
-        return true
+        return True
     if (not tile.imageSource().isEmpty()):
-        return true
+        return True
     if (tile.objectGroup()):
-        return true
+        return True
     if (tile.isAnimated()):
-        return true
+        return True
     if (tile.terrain() != 0xFFFFFFFF):
-        return true
+        return True
     if (tile.terrainProbability() != 1.0):
-        return true
-    return false
+        return True
+    return False
 
 def toString(shape):
     x = shape
-    if False:
-        pass
-    elif x==MapObject.Rectangle:
+    if x==MapObject.Rectangle:
         return "rectangle"
     elif x==MapObject.Polygon:
         return "polygon"

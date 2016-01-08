@@ -25,17 +25,12 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 
-import os, sys
 from PyQt5.QtCore import (
     QObject, 
-    QPluginLoader,
-    QDirIterator,
-    QDir,
-    pyqtSignal, 
-    QLibrary,
-    qWarning
+    pyqtSignal
 )
 from pyqtcore import QList
+
 ##
 # A loaded plugin.
 ##
@@ -49,8 +44,8 @@ class LoadedPlugin():
 ##
 class PluginManager(QObject):
     mInstance = None
-    objectAdded = pyqtSignal(QObject)
-    objectAboutToBeRemoved = pyqtSignal(QObject)
+    objectAdded = pyqtSignal(list)
+    objectAboutToBeRemoved = pyqtSignal(list)
     
     def __init__(self):
         super().__init__()
@@ -78,24 +73,24 @@ class PluginManager(QObject):
     # Adds the given \a object. This allows the object to be found later based
     # on the interfaces it implements.
     ##
-    def addObject(object):
+    def addObject(self, object):
         PluginManager.mInstance.mObjects.append(object)
-        PluginManager.mInstance.objectAdded.emit(object)
+        PluginManager.mInstance.objectAdded.emit([object])
        
     ##
     # Removes the given \a object.
     ##
-    def removeObject(object):
-        PluginManager.mInstance.objectAboutToBeRemoved.emit(object)
+    def removeObject(self, object):
+        PluginManager.mInstance.objectAboutToBeRemoved.emit([object])
         PluginManager.mInstance.mObjects.removeOne(object)
 
     ##
     # Returns the list of objects that implement a given interface.
     ##
-    def objects():
+    def objects(_type):
         results = QList()
         for object in PluginManager.mInstance.mObjects:
-            if object:
+            if type(object) == _type:
                 results.append(object)
         return results
 
@@ -103,43 +98,35 @@ class PluginManager(QObject):
     # Scans the plugin directory for plugins and attempts to load them.
     ##
     def loadPlugins(self):
+        from plugins.csv.csvplugin import CsvPlugin
+        from plugins.droidcraft.droidcraftplugin import DroidcraftPlugin
+        from plugins.flare.flareplugin import FlarePlugin
+        from plugins.json.jsonplugin import JsonPlugin
+        from plugins.lua.luaplugin import LuaPlugin
+        from plugins.replicaisland.replicaislandplugin import ReplicaIslandPlugin
+        from plugins.tengine.tengineplugin import TenginePlugin
+        from plugins.tmw.tmwplugin import TmwPlugin
+        
+        static_plugins = [
+            {'name':'CsvPlugin', 'instance':CsvPlugin},
+            {'name':'DroidcraftPlugin', 'instance':DroidcraftPlugin},
+            {'name':'FlarePlugin', 'instance':FlarePlugin},
+            {'name':'JsonPlugin', 'instance':JsonPlugin},
+            {'name':'LuaPlugin', 'instance':LuaPlugin},
+            {'name':'ReplicaIslandPlugin', 'instance':ReplicaIslandPlugin},
+            {'name':'TenginePlugin', 'instance':TenginePlugin},
+            {'name':'TmwPlugin', 'instance':TmwPlugin}
+        ]
+        
         # Load static plugins
-        for instance in QPluginLoader.staticInstances():
-            self.mPlugins.append(LoadedPlugin("", instance))
-            plugin = instance
-            if (type(plugin) == LoadedPlugin):
-                plugin.initialize()
+        for plugin in static_plugins:
+            name = plugin['name']
+            instance = plugin['instance']
+            self.mPlugins.append(LoadedPlugin(name, instance))
+            if hasattr(instance, 'initialize'):
+                instance().initialize()
             else:
-                self.addObject(instance)
-            
-        # Determine the plugin path based on the application location
-        pluginPath, _ = os.path.split(sys.argv[0])
-
-        if sys.platform == 'win32':
-            pluginPath += "/plugins/tiled"
-        elif sys.platform == 'darwin':
-            pluginPath += "/../PlugIns"
-        else:
-            pluginPath += "/../lib/tiled/plugins"
-
-        # Load dynamic plugins
-        iterator = QDirIterator(pluginPath, QDir.Files | QDir.Readable)
-        while (iterator.hasNext()):
-            pluginFile = iterator.next()
-            if (not QLibrary.isLibrary(pluginFile)):
-                continue
-            loader = QPluginLoader(pluginFile)
-            instance = loader.instance()
-            if (not instance):
-                qWarning("Error:"+loader.errorString())
-                continue
-
-            self.mPlugins.append(LoadedPlugin(pluginFile, instance))
-            plugin = instance
-            if (type(plugin) == LoadedPlugin):
-                plugin.initialize()
-            else:
-                self.addObject(instance)
+                self.addObject(instance())
 
     ##
     # Returns the list of plugins found by the plugin manager.
@@ -161,10 +148,10 @@ class PluginManager(QObject):
     ##
     # Calls the given function for each object implementing a given interface.
     ##
-    def each(function):
+    def each(helper, function):
         for object in PluginManager.mInstance.mObjects:
             if object:
-                function(object)
+                function(helper, object)
     
     def pluginByFileName(self, pluginFileName):
         for plugin in self.mPlugins:

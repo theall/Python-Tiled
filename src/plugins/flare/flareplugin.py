@@ -1,6 +1,5 @@
 ##
 # Flare Tiled Plugin
-# Copyright 2015, Bilge Theall <bilge.theall@gmail.com.cn> 
 # Copyright 2010, Jaderamiso <jaderamiso@gmail.com>
 # Copyright 2011, Stefan Beller <stefanbeller@googlemail.com>
 # Copyright 2011, Clint Bellanger <clintbellanger@gmail.com>
@@ -27,14 +26,12 @@ from tilelayer import TileLayer
 from mapobject import MapObject
 from map import Map, orientationFromString, orientationToString
 from gidmapper import GidMapper
-from mapreaderinterface import MapReaderInterface
-from mapwriterinterface import MapWriterInterface
+from mapformat import MapFormat
 from pyqtcore import (
     QString
 )
 from PyQt5.QtCore import (
     QPoint,
-    QObject,
     QDir,
     QPointF,
     QFileInfo,
@@ -42,9 +39,11 @@ from PyQt5.QtCore import (
     QFile,
     QIODevice
 )
-class FlarePlugin(QObject, MapWriterInterface, MapReaderInterface):
+class FlarePlugin(MapFormat):
     def __init__(self):
-        self.mError = QString()
+        super().__init__()
+        
+        self.mError = ''
 
     # MapReaderInterface
     def read(self, fileName):
