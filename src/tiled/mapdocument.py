@@ -310,7 +310,7 @@ class MapDocument(QObject):
         
         if (not mapFormat and not tmxMapFormat.supportsFile(fileName)):
             # Try to find a plugin that implements support for this format
-            formats = PluginManager.objects(MapFormat)
+            formats = PluginManager.objects()
             for format in formats:
                 if (format.supportsFile(fileName)):
                     mapFormat = format

@@ -21,7 +21,7 @@
 from layer import Layer
 from mapobject import MapObject
 from gidmapper import GidMapper
-from map import Map, orientationToString, staggerAxisToString, staggerIndexToString
+from map import Map, orientationToString, staggerAxisToString, staggerIndexToString, renderOrderToString
 from lua.luatablewriter import LuaTableWriter
 from mapformat import WritableMapFormat
 from pyqtcore import (
@@ -58,7 +58,7 @@ class LuaPlugin(WritableMapFormat):
             self.mError = self.tr("Could not open file for writing.")
             return False
         
-        self.mMapDir = QFileInfo(fileName).path()
+        self.mMapDir = QDir(QFileInfo(fileName).path())
         writer = LuaTableWriter(file)
         writer.writeStartDocument()
         self.writeMap(writer, map)
@@ -78,25 +78,25 @@ class LuaPlugin(WritableMapFormat):
     def errorString(self):
         return self.mError
 
-    def writeMap(self, writer, arg2):
+    def writeMap(self, writer, map):
         writer.writeStartReturnTable()
         writer.writeKeyAndValue("version", "1.1")
         writer.writeKeyAndValue("luaversion", "5.1")
         writer.writeKeyAndValue("tiledversion", QCoreApplication.applicationVersion())
         orientation = orientationToString(map.orientation())
+        renderOrder = renderOrderToString(map.renderOrder())
         writer.writeKeyAndValue("orientation", orientation)
+        writer.writeKeyAndValue("renderorder", renderOrder)
         writer.writeKeyAndValue("width", map.width())
         writer.writeKeyAndValue("height", map.height())
         writer.writeKeyAndValue("tilewidth", map.tileWidth())
         writer.writeKeyAndValue("tileheight", map.tileHeight())
         writer.writeKeyAndValue("nextobjectid", map.nextObjectId())
-        if (map.orientation() == Map.Hexagonal):
+        if (map.orientation() == Map.Orientation.Hexagonal):
             writer.writeKeyAndValue("hexsidelength", map.hexSideLength())
-        if (map.orientation() == Map.Staggered or map.orientation() == Map.Hexagonal) :
-            writer.writeKeyAndValue("staggeraxis",
-                                    staggerAxisToString(map.staggerAxis()))
-            writer.writeKeyAndValue("staggerindex",
-                                    staggerIndexToString(map.staggerIndex()))
+        if (map.orientation() == Map.Orientation.Staggered or map.orientation() == Map.Orientation.Hexagonal) :
+            writer.writeKeyAndValue("staggeraxis", staggerAxisToString(map.staggerAxis()))
+            writer.writeKeyAndValue("staggerindex", staggerIndexToString(map.staggerIndex()))
         
         backgroundColor = map.backgroundColor()
         if (backgroundColor.isValid()) :
@@ -148,22 +148,22 @@ class LuaPlugin(WritableMapFormat):
             rel = self.mMapDir.relativeFilePath(tileset.fileName())
             writer.writeKeyAndValue("filename", rel)
         
-        ## Include all tileset information even for external tilesets, since the
+        ## 
+        # Include all tileset information even for external tilesets, since the
         # external reference is generally a .tsx file (in XML format).
         ##
         writer.writeKeyAndValue("tilewidth", tileset.tileWidth())
         writer.writeKeyAndValue("tileheight", tileset.tileHeight())
         writer.writeKeyAndValue("spacing", tileset.tileSpacing())
         writer.writeKeyAndValue("margin", tileset.margin())
-        if (not tileset.imageSource().isEmpty()) :
+        if tileset.imageSource() != '':
             rel = self.mMapDir.relativeFilePath(tileset.imageSource())
             writer.writeKeyAndValue("image", rel)
             writer.writeKeyAndValue("imagewidth", tileset.imageWidth())
             writer.writeKeyAndValue("imageheight", tileset.imageHeight())
         
-        if (tileset.transparentColor().isValid()) :
-            writer.writeKeyAndValue("transparentcolor",
-                                    tileset.transparentColor().name())
+        if (tileset.transparentColor().isValid()):
+            writer.writeKeyAndValue("transparentcolor",tileset.transparentColor().name())
 
         offset = tileset.tileOffset()
         writer.writeStartTable("tileoffset")
@@ -172,7 +172,7 @@ class LuaPlugin(WritableMapFormat):
         writer.writeEndTable()
         self.writeProperties(writer, tileset.properties())
         writer.writeStartTable("terrains")
-        for i in range(0, tileset.terrainCount()):
+        for i in range(tileset.terrainCount()):
             t = tileset.terrain(i)
             writer.writeStartTable()
             writer.writeKeyAndValue("name", t.name())

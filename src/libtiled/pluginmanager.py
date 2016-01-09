@@ -87,11 +87,12 @@ class PluginManager(QObject):
     ##
     # Returns the list of objects that implement a given interface.
     ##
-    def objects(_type):
+    def objects(_type=None):
         results = QList()
         for object in PluginManager.mInstance.mObjects:
-            if type(object) == _type:
-                results.append(object)
+            if _type!=None and type(object)!=_type:
+                continue
+            results.append(object)
         return results
 
     ##

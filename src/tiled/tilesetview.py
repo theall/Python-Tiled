@@ -446,9 +446,11 @@ class TileDelegate(QAbstractItemDelegate):
             step = (strip.height() - hole.height()) + hole.width()
             
             margin = (strip.height() - hole.height()) / 2
-            for x in range((step - hole.width()) / 2, strip.right(), step):
+            x = (step - hole.width()) / 2
+            while x < strip.right():
                 hole.moveTo(x, margin)
                 painter.drawRoundedRect(hole, 25, 25, Qt.RelativeSize)
+                x += step
                 
             painter.restore()
         

@@ -520,7 +520,7 @@ class MainWindow(QMainWindow):
             selectedFilter = self.mSettings.value("lastUsedOpenFilter", selectedFilter)
             
 
-            fileNames, _ = QFileDialog.getOpenFileNames(self, self.tr("Open Map"),
+            fileNames, selectedFilter = QFileDialog.getOpenFileNames(self, self.tr("Open Map"),
                                                             self.fileDialogStartLocation(),
                                                             helper.filter(), selectedFilter)
             if len(fileNames)<=0:

@@ -54,7 +54,7 @@ class TenginePlugin(WritableMapFormat):
         # Write the header
         header = map.property("header")
         for line in header.split("\\n"):
-            out.append(line + '\n')
+            out << line << '\n'
         
         width = map.width()
         height = map.height()
@@ -82,15 +82,13 @@ class TenginePlugin(WritableMapFormat):
                 currentTile = cachedTiles["?"]
                 for layer in map.layers():
                     # If the layer name does not start with one of the tile properties, skip it
-                    layerKey = QString()
-                    propertyIterator = propertyOrder
-                    while (propertyIterator.hasNext()) :
-                        currentProperty = propertyIterator.next()
-                        if (layer.name().startsWith(currentProperty, Qt.CaseInsensitive)) :
+                    layerKey = ''
+                    for currentProperty in propertyOrder:
+                        if (layer.name().lower().startswith(currentProperty.lower())) :
                             layerKey = currentProperty
                             break
 
-                    if (layerKey.isEmpty()) :
+                    if layerKey == '':
                         continue
                     
                     tileLayer = layer.asTileLayer()
@@ -158,7 +156,7 @@ class TenginePlugin(WritableMapFormat):
 
 
                 # Check the output type
-                if (currentTile["display"].length() > 1) :
+                if len(currentTile["display"]) > 1:
                     outputLists = True
                 
                 # Check if we are still the emptyTile
@@ -169,7 +167,7 @@ class TenginePlugin(WritableMapFormat):
                 asciiMap.append(currentTile["display"])
 
         # Write the definitions to the file
-        out.write("-- defineTile section\n")
+        out << "-- defineTile section\n"
         for i in cachedTiles.items():
             displayString = i[0]
             # Only print the emptyTile definition if there were empty tiles
@@ -183,10 +181,10 @@ class TenginePlugin(WritableMapFormat):
             if (not args.isEmpty()) :
                 args = QString(", %1").arg(args)
             
-            out.write("defineTile(\"%s\"%s)\n"%(displayString, args))
+            out << "defineTile(\"%s\"%s)\n"%(displayString, args)
         
         # Check for an ObjectGroup named AddSpot
-        out.write("\n-- addSpot section\n")
+        out << "\n-- addSpot section\n"
         for layer in map.layers():
             objectLayer = layer.asObjectGroup()
             if (objectLayer and objectLayer.name().startsWith("addspot", Qt.CaseInsensitive)) :
@@ -201,10 +199,10 @@ class TenginePlugin(WritableMapFormat):
                     
                     for y in range(math.floor(obj.y()), math.floor(obj.y() + obj.height())):
                         for y in range(math.floor(obj.x()), math.floor(obj.x() + obj.width())):
-                            out.write("addSpot({%s, %s}%s)\n"%(x, y, args))
+                            out << "addSpot({%s, %s}%s)\n"%(x, y, args)
         
         # Check for an ObjectGroup named AddZone
-        out.write("\n-- addZone section\n")
+        out << "\n-- addZone section\n"
         for layer in map.layers():
             objectLayer = layer.asObjectGroup()
             if (objectLayer and objectLayer.name().startsWith("addzone", Qt.CaseInsensitive)) :
@@ -221,7 +219,7 @@ class TenginePlugin(WritableMapFormat):
                     top_left_y = math.floor(obj.y())
                     bottom_right_x = math.floor(obj.x() + obj.width())
                     bottom_right_y = math.floor(obj.y() + obj.height())
-                    out.write("addZone({%s, %s, %s, %s}%s)"%(top_left_x, top_left_y, bottom_right_x, bottom_right_y, args))
+                    out << "addZone({%s, %s, %s, %s}%s)"%(top_left_x, top_left_y, bottom_right_x, bottom_right_y, args)
 
         
         # Write the map
@@ -249,17 +247,17 @@ class TenginePlugin(WritableMapFormat):
             itemStop = ""
             seperator = ""
         
-        out.write("\n-- ASCII map section\n")
-        out.write("return " + returnStart + '\n')
+        out << "\n-- ASCII map section\n"
+        out << "return " << returnStart << '\n'
         for y in range(0, height):
-            out.write(lineStart)
+            out << lineStart
             for x in range(0, width):
-                out.write(itemStart + asciiMap[x + (y * width)] + itemStop + seperator)
+                out << itemStart << asciiMap[x + (y * width)] << itemStop << seperator
             
             if (y == height - 1):
-                out.write(lineStop + returnStop)
+                out << lineStop << returnStop
             else :
-                out.write(lineStop + '\n')
+                out << lineStop << '\n'
 
         # And close the file
         file.close()
@@ -276,7 +274,7 @@ class TenginePlugin(WritableMapFormat):
         argString = QString()
         # We work backwards so we don't have to include a bunch of nils
         for i in range(propOrder.size() - 1, -1, -1):
-            currentValue = props[propOrder[i]]
+            currentValue = props.get(propOrder[i], '')
             # Special handling of the "additional" property
             if ((propOrder[i] == "additional") and currentValue.isEmpty()) :
                 currentValue = self.constructAdditionalTable(props, propOrder)
@@ -286,7 +284,7 @@ class TenginePlugin(WritableMapFormat):
                     currentValue = "nil"
                 
                 argString = "%s, %s"%(currentValue, argString)
-            elif (not currentValue.isEmpty()):
+            elif currentValue != '':
                 argString = currentValue
 
         return argString

@@ -83,7 +83,7 @@ class Object():
     # Returns the value of the object's \a name property.
     ##
     def property(self, name):
-        return self.mProperties.value(name)
+        return self.mProperties.value(name,'')
     ##
     # Returns whether this object has a property with the given \a name.
     ##

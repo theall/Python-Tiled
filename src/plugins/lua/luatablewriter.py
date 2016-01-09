@@ -76,7 +76,7 @@ class LuaTableWriter():
         if tp==int:
             self.writeUnquotedValue(QByteArray.number(value))
         elif tp==str:
-            self.writeUnquotedValue(self.quote(value).toUtf8())
+            self.writeUnquotedValue(self.quote(value).encode())
         elif tp==QByteArray:
             self.prepareNewValue()
             self.write('"')
@@ -84,6 +84,12 @@ class LuaTableWriter():
             self.write('"')
             self.m_newLine = False
             self.m_valueWritten = True
+
+    def writeUnquotedValue(self, value):
+        self.prepareNewValue()
+        self.write(value)
+        self.m_newLine = False
+        self.m_valueWritten = True
 
     def writeKeyAndValue(self, key, value):
         tp = type(value)
@@ -96,14 +102,14 @@ class LuaTableWriter():
                 v = "False"
             self.writeKeyAndUnquotedValue(key, v)
         elif tp==str:
-            self.writeKeyAndUnquotedValue(key, self.quote(value).toUtf8())
+            self.writeKeyAndUnquotedValue(key, self.quote(value).encode())
 
     def writeQuotedKeyAndValue(self, key, value):
         self.prepareNewLine()
         self.write('[')
-        self.write(self.quote(key).toUtf8())
+        self.write(self.quote(key).encode())
         self.write("] = ")
-        self.write(self.quote(value).toUtf8())
+        self.write(self.quote(value).encode())
         self.m_newLine = False
         self.m_valueWritten = True
 
@@ -125,8 +131,8 @@ class LuaTableWriter():
             elif tp==QByteArray:
                 self.write(arg1.data(), arg1.length())
         elif l==2:
-            bytes, length = args
-            if self.m_device.write(bytes, length) != length:
+            _bytes, length = args
+            if self.m_device.write(_bytes) != length:
                 self.m_error = True
 
     ##
@@ -145,24 +151,22 @@ class LuaTableWriter():
     def quote(self, s):
 
         quoted = "\""
-        for i in range(0, s.length()):
+        for i in range(len(s)):
             c = s[i]
-            x = c.unicode()
-            if False:
-                pass
-            elif x=='\\':
-                quoted.append("\\\\")
+            x = c.encode()
+            if x=='\\':
+                quoted += "\\\\"
                 break
             elif x=='"':
-                quoted.append("\\\"")
+                quoted += "\\\""
                 break
             elif x=='\n':
-                quoted.append("\\n")
+                quoted += "\\n"
                 break
             else:
-                quoted.append(c)
+                quoted += c
 
-        quoted.append('"')
+        quoted += '"'
         return quoted
 
     def prepareNewLine(self):

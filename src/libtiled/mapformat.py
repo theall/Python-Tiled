@@ -29,8 +29,7 @@
 from pluginmanager import PluginManager
 from pyqtcore import (
     QList,
-    QMap,
-    QStringList
+    QMap
 )
 from PyQt5.QtCore import (
     QObject
@@ -61,7 +60,7 @@ class FileFormat(QObject):
     # the map writer.
     ##
     def outputFiles(self, arg1, fileName):
-        return QStringList(fileName)
+        return [fileName]
     ##
     # Returns name filter for files in this map format.
     ##

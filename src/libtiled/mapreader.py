@@ -761,7 +761,7 @@ class MapReaderPrivate():
                 atts = self.xml.attributes()
                 frame = Frame()
                 frame.tileId = Int(atts.value("tileid"))
-                frame.duration = atts.value("duration")
+                frame.duration = Int(atts.value("duration"))
                 frames.append(frame)
                 self.xml.skipCurrentElement()
             else:

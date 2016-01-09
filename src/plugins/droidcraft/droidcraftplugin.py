@@ -32,6 +32,8 @@ from PyQt5.QtCore import (
 from PyQt5.QtGui import (
     QImage
 )
+import droidcraft.droidcraft_rc
+
 class DroidcraftPlugin(MapFormat):
     def __init__(self):
         super().__init__()
@@ -47,26 +49,27 @@ class DroidcraftPlugin(MapFormat):
         if (f.open(QIODevice.ReadOnly)) :
             compressed = f.readAll()
             f.close()
-            uncompressed = decompress(compressed, 48 * 48)
+            uncompressed, length = decompress(compressed, 48 * 48)
         
         # Check the data
         if (uncompressed.count() != 48 * 48) :
             self.mError = self.tr("This is not a valid Droidcraft map file!")
             return 0
         
+        uncompressed = uncompressed.data()
         # Build 48 x 48 map
         # Create a Map -> Create a Tileset -> Add Tileset to map
         # -> Create a TileLayer -> Fill layer -> Add TileLayer to Map
-        map = Map(Map.Orthogonal, 48, 48, 32, 32)
-        mapTileset = Tileset("tileset", 32, 32)
+        map = Map(Map.Orientation.Orthogonal, 48, 48, 32, 32)
+        mapTileset = Tileset.create("tileset", 32, 32)
         mapTileset.loadFromImage(QImage(":/tileset.png"), "tileset.png")
         map.addTileset(mapTileset)
         # Fill layer
         mapLayer =  TileLayer("map", 0, 0, 48, 48)
         # Load
         for i in range(0, 48 * 48):
-            tileFile = uncompressed.at(i)
-            y = i / 48
+            tileFile = int(uncompressed[i])&0xff
+            y = int(i / 48)
             x = i - (48 * y)
             tile = mapTileset.tileAt(tileFile)
             mapLayer.setCell(x, y, Cell(tile))
@@ -91,16 +94,18 @@ class DroidcraftPlugin(MapFormat):
             return False
         
         # Create QByteArray and compress it
-        uncompressed = QByteArray(48 * 48, 0)
+        uncompressed = QByteArray(48 * 48, b'\x00')
         width = mapLayer.width()
         height = mapLayer.height()
         for y in range(0, height):
             for x in range(0, width):
                 tile = mapLayer.cellAt(x, y).tile
                 if tile:
-                    uncompressed[y * width + x] = tile.id()&0xff
+                    # 'QByteArray' object does not support item assignment
+                    uncompressed.replace(y * width + x, 1, bytes([tile.id()&0xff]))
 
         compressed = compress(uncompressed, CompressionMethod.Gzip)
+        
         # Write QByteArray
         file = QFile(fileName)
         if (not file.open(QIODevice.WriteOnly)) :

@@ -19,7 +19,8 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from tiled_global import Int2
+import replicaisland.replicaisland_rc
+from tiled_global import Int2, Float2
 from tilelayer import TileLayer, Cell
 from tileset import Tileset
 from mapformat import MapFormat
@@ -29,7 +30,6 @@ from pyqtcore import (
     QString
 )
 from PyQt5.QtCore import (
-    QByteArray,
     QDataStream,
     QFileInfo,
     QFile,
@@ -73,7 +73,7 @@ class ReplicaIslandPlugin(MapFormat):
             return 0
         
         # Create our map, setting width and height to 0 until we load a layer.
-        map = Map(Map.Orthogonal, 0, 0, 32, 32)
+        map = Map(Map.Orientation.Orthogonal, 0, 0, 32, 32)
         map.setProperty("background_index", QString.number(backgroundIndex))
         # Load our Tilesets.
         typeTilesets = QList()
@@ -111,18 +111,20 @@ class ReplicaIslandPlugin(MapFormat):
             # Look up the tileset for this layer.
             tileset = self.tilesetForLayer(_type, tileIndex, typeTilesets, tileIndexTilesets)
             # Read our tile data all at once.
-            tileData = QByteArray(width*height, '\0')
-            bytesRead = _in.readRawData(tileData.data(), tileData.size())
-            if (bytesRead != tileData.size()):
+            #tileData = QByteArray(width*height, b'\x00')
+            bytesNeeded = width*height
+            tileData = _in.readRawData(bytesNeeded)
+            bytesRead = len(tileData)
+            if (bytesRead != bytesNeeded):
                 self.mError = self.tr("File ended in middle of layer!")
                 return 0
             
-            tp = tileData.data()&0xff
+            i = 0
             # Add the tiles to our layer.
             for y in range(0, height):
                 for x in range(0, width):
-                    tile_id = tp
-                    tp += 1
+                    tile_id = tileData[i]&0xff
+                    i += 1
                     if (tile_id != 255):
                         tile = tileset.tileAt(tile_id)
                         layer.setCell(x, y, Cell(tile))
@@ -172,14 +174,14 @@ class ReplicaIslandPlugin(MapFormat):
         out.setByteOrder(QDataStream.LittleEndian)
         out.setFloatingPointPrecision(QDataStream.SinglePrecision)
         # Write out the signature and file header.
-        out.write(96) # Signature.
-        out.write(map.layerCount())
+        out.writeInt8(96) # Signature.
+        out.writeInt8(map.layerCount())
         ok = False
         x, ok = Int2(map.property("background_index"))
         if (not ok):
             self.mError = self.tr("You must define a background_index property on the map!")
             return False
-        out.write(x)
+        out.writeInt8(x)
         # Write out each layer.
         for i in range(0, map.layerCount()):
             layer = map.layerAt(i).asTileLayer()
@@ -247,33 +249,33 @@ class ReplicaIslandPlugin(MapFormat):
         # Write out the layer header.
         x, ok = Int2(layer.property("type"))
         if (not ok):
-            self.mError = self.tr("You must define a _type property on each layer!")
+            self.mError = self.tr("You must define a type property on each layer!")
             return False
-        out.write(x)
+        out.writeInt8(x)
         
         x, ok = Int2(layer.property("tile_index"))
         if (not ok):
             self.mError = self.tr("You must define a tile_index property on each layer!")
             return False
-        out.write(x)
+        out.writeInt8(x)
         
-        x, ok = Int2(layer.property("scroll_speed"))
+        x, ok = Float2(layer.property("scroll_speed"))
         if (not ok):
             self.mError = self.tr("You must define a scroll_speed property on each layer!")
             return False
-        out.write(x)
+        out.writeFloat(x)
         
-        out.write(42); # Layer signature.
-        out.write(layer.width())
-        out.write(layer.height())
+        out.writeInt8(42) # Layer signature.
+        out.writeInt32(layer.width())
+        out.writeInt32(layer.height())
         # Write out the raw tile data.  We assume that the user has used the
         # correct tileset for this layer.
         for y in range(0, layer.height()):
             for x in range(0, layer.width()):
                 tile = layer.cellAt(x, y).tile
                 if (tile):
-                    out.write(tile.id())
+                    out.writeInt8(tile.id())
                 else:
-                    out.write(255)
+                    out.writeInt8(255)
 
         return True

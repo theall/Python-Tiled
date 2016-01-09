@@ -20,6 +20,7 @@
 # this program. If not, see .
 ##
 
+from tiled_global import Int
 from objectgroup import ObjectGroup
 from tileset import Tileset
 from tilelayer import TileLayer
@@ -53,7 +54,7 @@ class FlarePlugin(MapFormat):
             return 0
         
         # default to values of the original flare alpha game.
-        map = Map(Map.Isometric, 256, 256, 64, 32)
+        map = Map(Map.Orientation.Isometric, 256, 256, 64, 32)
         stream = QTextStream(file)
         line = QString()
         sectionName = QString()
@@ -70,29 +71,29 @@ class FlarePlugin(MapFormat):
         tilelayerSectionFound = False; # tile layer or objects
         while (not stream.atEnd()):
             line = stream.readLine()
-            if (not line.length()):
+            if line == '':
                 continue
-            startsWith = line.at(0)
+            startsWith = line[0]
             if (startsWith == '['):
-                sectionName = line.mid(1, line.indexOf(']') - 1)
+                sectionName = line[1:line.index(']')]
                 newsection = True
                 continue
             
             if (sectionName == "header"):
                 headerSectionFound = True
                 #get map properties
-                epos = line.indexOf('=')
+                epos = line.index('=')
                 if (epos != -1):
-                    key = line.left(epos).trimmed()
-                    value = line.mid(epos + 1, -1).trimmed()
+                    key = line[:epos].strip()
+                    value = line[epos + 1:].strip()
                     if (key == "width"):
-                        map.setWidth(value.toInt())
+                        map.setWidth(Int(value))
                     elif (key == "height"):
-                        map.setHeight(value.toInt())
+                        map.setHeight(Int(value))
                     elif (key == "tilewidth"):
-                        map.setTileWidth(value.toInt())
+                        map.setTileWidth(Int(value))
                     elif (key == "tileheight"):
-                        map.setTileHeight(value.toInt())
+                        map.setTileHeight(Int(value))
                     elif (key == "orientation"):
                         map.setOrientation(orientationFromString(value))
                     else:
@@ -100,19 +101,19 @@ class FlarePlugin(MapFormat):
                 
             elif (sectionName == "tilesets"):
                 tilesetsSectionFound = True
-                epos = line.indexOf('=')
-                key = line.left(epos).trimmed()
-                value = line.mid(epos + 1, -1).trimmed()
+                epos = line.index('=')
+                key = line[:epos].strip()
+                value = line[epos + 1:].strip()
                 if (key == "tileset"):
                     _list = value.split(',')
-                    absoluteSource = QString(_list.first())
+                    absoluteSource = _list[0]
                     if (QDir.isRelativePath(absoluteSource)):
                         absoluteSource = path + '/' + absoluteSource
                     tilesetwidth = 0
                     tilesetheight = 0
-                    if (_list.size() > 2):
-                        tilesetwidth = _list[1].toInt()
-                        tilesetheight = _list[2].toInt()
+                    if len(_list) > 2:
+                        tilesetwidth = Int(_list[1])
+                        tilesetheight = Int(_list[2])
                     
                     tileset = Tileset(QFileInfo(absoluteSource).fileName(), tilesetwidth, tilesetheight)
                     ok = tileset.loadFromImage(absoluteSource)
@@ -121,11 +122,11 @@ class FlarePlugin(MapFormat):
                         del map
                         return 0
                     else :
-                        if (_list.size() > 4):
-                            tileset.setTileOffset(QPoint(_list[3].toInt(),_list[4].toInt()))
+                        if len(_list) > 4:
+                            tileset.setTileOffset(QPoint(Int(_list[3]),Int(_list[4])))
                         gidMapper.insert(gid, tileset)
-                        if (_list.size() > 5):
-                            gid += _list[5].toInt()
+                        if len(_list) > 5:
+                            gid += Int(_list[5])
                         else :
                             gid += tileset.tileCount()
                         
@@ -138,10 +139,10 @@ class FlarePlugin(MapFormat):
                     return 0
                 
                 tilelayerSectionFound = True
-                epos = line.indexOf('=')
+                epos = line.index('=')
                 if (epos != -1):
-                    key = line.left(epos).trimmed()
-                    value = line.mid(epos + 1, -1).trimmed()
+                    key = line[:epos].strip()
+                    value = line[epos + 1:].strip()
                     if (key == "type"):
                         tilelayer = TileLayer(value, 0, 0, map.width(),map.height())
                         map.addLayer(tilelayer)
@@ -155,10 +156,10 @@ class FlarePlugin(MapFormat):
                         for y in range(map.height()):
                             line = stream.readLine()
                             l = line.split(',')
-                            for x in range(min(map.width(), l.size())):
+                            for x in range(min(map.width(), len(l))):
                                 ok = False
-                                tileid = l[x].toInt(0, base)
-                                c = gidMapper.gidToCell(tileid, ok)
+                                tileid = int(l[x], base)
+                                c, ok = gidMapper.gidToCell(tileid)
                                 if (not ok):
                                     self.mError += self.tr("Error mapping tile id %1.").arg(tileid)
                                     #del map
@@ -184,13 +185,13 @@ class FlarePlugin(MapFormat):
                 if (not mapobject):
                     continue
                 if (startsWith == '#'):
-                    name = line.mid(1).trimmed()
+                    name = line[1].strip()
                     mapobject.setName(name)
                 
-                epos = line.indexOf('=')
+                epos = line.index('=')
                 if (epos != -1):
-                    key = line.left(epos).trimmed()
-                    value = line.mid(epos + 1, -1).trimmed()
+                    key = line[:epos].strip()
+                    value = line[epos + 1:].strip()
                     if (key == "type"):
                         mapobject.setType(value)
                     elif (key == "location"):
@@ -200,9 +201,9 @@ class FlarePlugin(MapFormat):
                         if (map.orientation() == Map.Orthogonal):
                             x = loc[0].toFloat()*map.tileWidth()
                             y = loc[1].toFloat()*map.tileHeight()
-                            if (loc.size() > 3):
-                                w = loc[2].toInt()*map.tileWidth()
-                                h = loc[3].toInt()*map.tileHeight()
+                            if len(loc) > 3:
+                                w = Int(loc[2])*map.tileWidth()
+                                h = Int(loc[3])*map.tileHeight()
                             else :
                                 w = map.tileWidth()
                                 h = map.tileHeight()
@@ -210,9 +211,9 @@ class FlarePlugin(MapFormat):
                         else :
                             x = loc[0].toFloat()*map.tileHeight()
                             y = loc[1].toFloat()*map.tileHeight()
-                            if (loc.size() > 3):
-                                w = loc[2].toInt()*map.tileHeight()
-                                h = loc[3].toInt()*map.tileHeight()
+                            if len(loc) > 3:
+                                w = Int(loc[2])*map.tileHeight()
+                                h = Int(loc[3])*map.tileHeight()
                             else :
                                 w = h = map.tileHeight()
 
@@ -245,64 +246,64 @@ class FlarePlugin(MapFormat):
         mapWidth = map.width()
         mapHeight = map.height()
         # write [header]
-        out.write("[header]\n")
-        out.write("width=%d" + str(mapWidth) + "\n")
-        out.write("height=" + str(mapHeight) + "\n")
-        out.write("tilewidth=" + str(map.tileWidth()) + "\n")
-        out.write("tileheight=" + str(map.tileHeight()) + "\n")
-        out.write("orientation=" + str(orientationToString(map.orientation())) + "\n")
+        out << "[header]\n"
+        out << "width=" << str(mapWidth) << "\n"
+        out << "height=" << str(mapHeight) << "\n"
+        out << "tilewidth=" << str(map.tileWidth()) << "\n"
+        out << "tileheight=" << str(map.tileHeight()) << "\n"
+        out << "orientation=" << str(orientationToString(map.orientation())) << "\n"
         # write all properties for this map
         for it in map.properties().__iter__():
-            out.write(it[0] + "=" + it[1] + "\n")
+            out << it[0] << "=" << it[1] << "\n"
         
-        out.write("\n")
+        out << "\n"
         mapDir = QFileInfo(fileName).absoluteDir()
-        out.write("[tilesets]\n")
+        out << "[tilesets]\n"
         for ts in map.tilesets():
             imageSource = ts.imageSource()
             source = mapDir.relativeFilePath(imageSource)
-            out.write("tileset=" + source
-                + "," + str(ts.tileWidth())
-                + "," + str(ts.tileHeight())
-                + "," + str(ts.tileOffset().x())
-                + "," + str(ts.tileOffset().y())
-                + "\n")
+            out << "tileset=" << source \
+                << "," << str(ts.tileWidth()) \
+                << "," << str(ts.tileHeight()) \
+                << "," << str(ts.tileOffset().x()) \
+                << "," << str(ts.tileOffset().y()) \
+                << "\n"
         
-        out.write("\n")
+        out << "\n"
         gidMapper = GidMapper(map.tilesets())
         # write layers
         for layer in map.layers():
             tileLayer = layer.asTileLayer()
             if tileLayer:
-                out.write("[layer]\n")
-                out.write("type=" + layer.name() + "\n")
-                out.write("data=\n")
+                out << "[layer]\n"
+                out << "type=" << layer.name() << "\n"
+                out << "data=\n"
                 for y in range(0, mapHeight):
                     for x in range(0, mapWidth):
                         t = tileLayer.cellAt(x, y)
                         id = 0
                         if (t.tile):
                             id = gidMapper.cellToGid(t)
-                        out.write(id)
+                        out << id
                         if (x < mapWidth - 1):
-                            out.write(",")
+                            out << ","
                     
                     if (y < mapHeight - 1):
-                        out.write(",")
-                    out.write("\n")
+                        out << ","
+                    out << "\n"
                 
-                out.write("\n")
+                out << "\n"
             
             group = layer.asObjectGroup()
             if group:
                 for o in group.objects():
                     if ((not o.type().isEmpty())):
-                        out.write("[" + group.name() + "]\n")
+                        out << "[" << group.name() << "]\n"
                         # display object name as comment
                         if o.name() != '':
-                            out.write("# " + o.name() + "\n")
+                            out << "# " << o.name() << "\n"
                         
-                        out.write("type=" + o.type() + "\n")
+                        out << "type=" << o.type() << "\n"
                         x,y,w,h = 0
                         if (map.orientation() == Map.Orthogonal):
                             x = o.x()/map.tileWidth()
@@ -315,13 +316,13 @@ class FlarePlugin(MapFormat):
                             w = o.width()/map.tileHeight()
                             h = o.height()/map.tileHeight()
                         
-                        out.write("location=" + x + "," + y)
-                        out.write("," + w + "," + h + "\n")
+                        out << "location=" << x << "," << y
+                        out << "," << w << "," << h << "\n"
                         # write all properties for this object
                         for it in o.properties().__iter__():
-                            out.write(it[0] + "=" + it[1] + "\n")
+                            out << it[0] << "=" << it[1] << "\n"
                         
-                        out.write("\n")
+                        out << "\n"
 
 
         file.close()

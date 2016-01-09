@@ -61,7 +61,7 @@ class CsvPlugin(WritableMapFormat):
                 cell = tileLayer.cellAt(x, y)
                 tile = cell.tile
                 if (tile and tile.hasProperty("name")) :
-                    file.write(tile.property("name").toUtf8())
+                    file.write(tile.property("name").encode())
                 else:
                     if tile:
                         id = tile.id()
