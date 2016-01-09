@@ -144,8 +144,9 @@ class TilesetManager(QObject):
             self.mTilesets[tileset] += 1
         else:
             self.mTilesets.insert(tileset, 1)
-            if (tileset.imageSource()!=''):
-                self.mWatcher.addPath(tileset.imageSource())
+            imgSrc = tileset.imageSource()
+            if (imgSrc != ''):
+                self.mWatcher.addPath(imgSrc)
 
     ##
     # Removes a tileset reference. When the last reference has been removed,

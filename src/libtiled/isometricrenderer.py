@@ -254,7 +254,7 @@ class IsometricRenderer(MapRenderer):
             if (self.testFlag(RenderFlag.ShowTileObjectOutlines)):
                 rect = QRectF(QPointF(pos.x() - imgSize.width() / 2 + tileOffset.x(),
                                     pos.y() - imgSize.height() + tileOffset.y()),
-                            imgSize)
+                            QSizeF(imgSize))
                 pen.setStyle(Qt.SolidLine)
                 painter.setPen(pen)
                 painter.drawRect(rect)

@@ -223,7 +223,7 @@ class ReplicaIslandPlugin(MapFormat):
         self.addTilesetsToMap(map, tileIndexTilesets)
     
     def loadTilesetFromResource(self, name):
-        tileset = Tileset(name, 32, 32)
+        tileset = Tileset.create(name, 32, 32)
         tileset.loadFromImage(QImage(":/" + name + ".png"), name + ".png")
         return tileset
     

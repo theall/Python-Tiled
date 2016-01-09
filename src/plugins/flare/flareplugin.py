@@ -115,7 +115,7 @@ class FlarePlugin(MapFormat):
                         tilesetwidth = Int(_list[1])
                         tilesetheight = Int(_list[2])
                     
-                    tileset = Tileset(QFileInfo(absoluteSource).fileName(), tilesetwidth, tilesetheight)
+                    tileset = Tileset.create(QFileInfo(absoluteSource).fileName(), tilesetwidth, tilesetheight)
                     ok = tileset.loadFromImage(absoluteSource)
                     if not ok:
                         self.mError = self.tr("Error loading tileset %s, which expands to %s. Path not found!"%(_list[0], absoluteSource))
