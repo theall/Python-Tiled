@@ -37,7 +37,8 @@ from PyQt5.QtCore import (
     QPointF,
     QFileInfo,
     QTextStream,
-    QFile,
+    QFile, 
+    QSaveFile,
     QIODevice
 )
 class FlarePlugin(MapFormat):
@@ -51,7 +52,7 @@ class FlarePlugin(MapFormat):
         file = QFile(fileName)
         if (not file.open (QIODevice.ReadOnly)):
             self.mError = self.tr("Could not open file for reading.")
-            return 0
+            return None
         
         # default to values of the original flare alpha game.
         map = Map(Map.Orientation.Isometric, 256, 256, 64, 32)
@@ -63,12 +64,12 @@ class FlarePlugin(MapFormat):
         base = 10
         gidMapper = GidMapper()
         gid = 1
-        tilelayer = 0
-        objectgroup = 0
-        mapobject = 0
+        tilelayer = None
+        objectgroup = None
+        mapobject = None
         tilesetsSectionFound = False
         headerSectionFound = False
-        tilelayerSectionFound = False; # tile layer or objects
+        tilelayerSectionFound = False # tile layer or objects
         while (not stream.atEnd()):
             line = stream.readLine()
             if line == '':
@@ -119,8 +120,7 @@ class FlarePlugin(MapFormat):
                     ok = tileset.loadFromImage(absoluteSource)
                     if not ok:
                         self.mError = self.tr("Error loading tileset %s, which expands to %s. Path not found!"%(_list[0], absoluteSource))
-                        del map
-                        return 0
+                        return None
                     else :
                         if len(_list) > 4:
                             tileset.setTileOffset(QPoint(Int(_list[3]),Int(_list[4])))
@@ -135,8 +135,7 @@ class FlarePlugin(MapFormat):
             elif (sectionName == "layer"):
                 if (not tilesetsSectionFound):
                     self.mError = self.tr("No tilesets section found before layer section.")
-                    #del map
-                    return 0
+                    return None
                 
                 tilelayerSectionFound = True
                 epos = line.index('=')
@@ -162,8 +161,7 @@ class FlarePlugin(MapFormat):
                                 c, ok = gidMapper.gidToCell(tileid)
                                 if (not ok):
                                     self.mError += self.tr("Error mapping tile id %1.").arg(tileid)
-                                    #del map
-                                    return 0
+                                    return None
                                 
                                 tilelayer.setCell(x, y, c)
 
@@ -227,16 +225,16 @@ class FlarePlugin(MapFormat):
             self.mError = self.tr("This seems to be no valid flare map. "
                         "A Flare map consists of at least a header "
                         "section, a tileset section and one tile layer.")
-            #del map
-            return 0
+            return None
         
         return map
+        
     def supportsFile(self, fileName):
         return QFileInfo(fileName).suffix() == "txt"
     
     # MapWriterInterface
     def write(self, map, fileName):
-        file = QFile(fileName)
+        file = QSaveFile(fileName)
         if (not file.open(QFile.WriteOnly | QFile.Text)):
             self.mError = self.tr("Could not open file for writing.")
             return False
@@ -259,14 +257,14 @@ class FlarePlugin(MapFormat):
         out << "\n"
         mapDir = QFileInfo(fileName).absoluteDir()
         out << "[tilesets]\n"
-        for ts in map.tilesets():
-            imageSource = ts.imageSource()
+        for tileset in map.tilesets():
+            imageSource = tileset.imageSource()
             source = mapDir.relativeFilePath(imageSource)
             out << "tileset=" << source \
-                << "," << str(ts.tileWidth()) \
-                << "," << str(ts.tileHeight()) \
-                << "," << str(ts.tileOffset().x()) \
-                << "," << str(ts.tileOffset().y()) \
+                << "," << str(tileset.tileWidth()) \
+                << "," << str(tileset.tileHeight()) \
+                << "," << str(tileset.tileOffset().x()) \
+                << "," << str(tileset.tileOffset().y()) \
                 << "\n"
         
         out << "\n"
@@ -297,7 +295,7 @@ class FlarePlugin(MapFormat):
             group = layer.asObjectGroup()
             if group:
                 for o in group.objects():
-                    if ((not o.type().isEmpty())):
+                    if o.type() != '':
                         out << "[" << group.name() << "]\n"
                         # display object name as comment
                         if o.name() != '':
@@ -325,7 +323,10 @@ class FlarePlugin(MapFormat):
                         out << "\n"
 
 
-        file.close()
+        if not file.commit():
+            self.mError = file.errorString()
+            return False
+
         return True
     
     def nameFilter(self):

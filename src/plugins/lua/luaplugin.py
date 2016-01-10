@@ -31,6 +31,7 @@ from PyQt5.QtCore import (
     QFile,
     QSaveFile,
     QFileInfo,
+    QByteArray, 
     QCoreApplication,
     QIODevice,
     QDir
@@ -125,7 +126,7 @@ class LuaPlugin(WritableMapFormat):
         for layer in map.layers():
             x = layer.layerType()
             if x==Layer.TileLayerType:
-                self.writeTileLayer(writer, layer)
+                self.writeTileLayer(writer, layer, map.layerDataFormat())
             elif x==Layer.ObjectGroupType:
                 self.writeObjectGroup(writer, layer)
             elif x==Layer.ImageLayerType:
@@ -144,7 +145,7 @@ class LuaPlugin(WritableMapFormat):
         writer.writeStartTable()
         writer.writeKeyAndValue("name", tileset.name())
         writer.writeKeyAndValue("firstgid", firstGid)
-        if (not tileset.fileName().isEmpty()) :
+        if tileset.fileName() != '':
             rel = self.mMapDir.relativeFilePath(tileset.fileName())
             writer.writeKeyAndValue("filename", rel)
         
@@ -179,8 +180,9 @@ class LuaPlugin(WritableMapFormat):
             writer.writeKeyAndValue("tile", t.imageTileId())
             self.writeProperties(writer, t.properties())
             writer.writeEndTable()
-        
+
         writer.writeEndTable()
+        writer.writeKeyAndValue("tilecount", tileset.tileCount())
         writer.writeStartTable("tiles")
         for i in range(0, tileset.tileCount()):
             tile = tileset.tileAt(i)
@@ -191,7 +193,7 @@ class LuaPlugin(WritableMapFormat):
             writer.writeKeyAndValue("id", i)
             if (not tile.properties().isEmpty()):
                 self.writeProperties(writer, tile.properties())
-            if (not tile.imageSource().isEmpty()) :
+            if tile.imageSource() != '':
                 src = self.mMapDir.relativeFilePath(tile.imageSource())
                 tileSize = tile.size()
                 writer.writeKeyAndValue("image", src)
@@ -222,14 +224,14 @@ class LuaPlugin(WritableMapFormat):
                     writer.writeKeyAndValue("duration", QString.number(frame.duration))
                     writer.writeEndTable()
                 
-                writer.writeEndTable(); # animation
+                writer.writeEndTable() # animation
             
-            writer.writeEndTable(); # tile
+            writer.writeEndTable() # tile
         
-        writer.writeEndTable(); # tiles
-        writer.writeEndTable(); # tileset
+        writer.writeEndTable() # tiles
+        writer.writeEndTable() # tileset
     
-    def writeTileLayer(self, writer, tileLayer):
+    def writeTileLayer(self, writer, tileLayer, format):
         writer.writeStartTable()
         writer.writeKeyAndValue("type", "tilelayer")
         writer.writeKeyAndValue("name", tileLayer.name())
@@ -239,20 +241,37 @@ class LuaPlugin(WritableMapFormat):
         writer.writeKeyAndValue("height", tileLayer.height())
         writer.writeKeyAndValue("visible", tileLayer.isVisible())
         writer.writeKeyAndValue("opacity", tileLayer.opacity())
-        self.writeProperties(writer, tileLayer.properties())
-        writer.writeKeyAndValue("encoding", "lua")
-        writer.writeStartTable("data")
-        for y in range(0, tileLayer.height()):
-            if (y > 0):
-                writer.prepareNewLine()
-            for x in range(0, tileLayer.width()):
-                writer.writeValue(self.mGidMapper.cellToGid(tileLayer.cellAt(x, y)))
-        
+        offset = tileLayer.offset()
+        writer.writeKeyAndValue("offsetx", offset.x())
+        writer.writeKeyAndValue("offsety", offset.y())
+
+        if format==Map.LayerDataFormat.XML or format==Map.LayerDataFormat.CSV:
+            self.writeProperties(writer, tileLayer.properties())
+            writer.writeKeyAndValue("encoding", "lua")
+            writer.writeStartTable("data")
+            for y in range(0, tileLayer.height()):
+                if (y > 0):
+                    writer.prepareNewLine()
+                for x in range(0, tileLayer.width()):
+                    writer.writeValue(self.mGidMapper.cellToGid(tileLayer.cellAt(x, y)))
+        elif format==Map.LayerDataFormat.Base64 \
+            or format==Map.LayerDataFormat.Base64Zlib \
+            or format==Map.LayerDataFormat.Base64Gzip:
+            writer.writeKeyAndValue("encoding", "base64")
+
+            if format == Map.LayerDataFormat.Base64Zlib:
+                writer.writeKeyAndValue("compression", "zlib")
+            elif format == Map.LayerDataFormat.Base64Gzip:
+                writer.writeKeyAndValue("compression", "gzip")
+
+            layerData = self.mGidMapper.encodeLayerData(tileLayer, format)
+            writer.writeKeyAndValue("data", layerData)
+
         writer.writeEndTable()
         writer.writeEndTable()
     
-    def writeObjectGroup(self, writer, objectGroup, key):
-        if (key.isEmpty()):
+    def writeObjectGroup(self, writer, objectGroup, key=QByteArray()):
+        if key=='':
             writer.writeStartTable()
         else:
             writer.writeStartTable(key)
@@ -260,6 +279,11 @@ class LuaPlugin(WritableMapFormat):
         writer.writeKeyAndValue("name", objectGroup.name())
         writer.writeKeyAndValue("visible", objectGroup.isVisible())
         writer.writeKeyAndValue("opacity", objectGroup.opacity())
+        
+        offset = objectGroup.offset()
+        writer.writeKeyAndValue("offsetx", offset.x())
+        writer.writeKeyAndValue("offsety", offset.y())
+
         self.writeProperties(writer, objectGroup.properties())
         writer.writeStartTable("objects")
         for mapObject in objectGroup.objects():
@@ -369,7 +393,7 @@ class LuaPlugin(WritableMapFormat):
 def includeTile(tile):
     if (not tile.properties().isEmpty()):
         return True
-    if (not tile.imageSource().isEmpty()):
+    if tile.imageSource() != '':
         return True
     if (tile.objectGroup()):
         return True
@@ -377,7 +401,7 @@ def includeTile(tile):
         return True
     if (tile.terrain() != 0xFFFFFFFF):
         return True
-    if (tile.terrainProbability() != 1.0):
+    if (tile.probability() != 1.0):
         return True
     return False
 

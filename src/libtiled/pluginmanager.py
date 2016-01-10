@@ -73,7 +73,7 @@ class PluginManager(QObject):
     # Adds the given \a object. This allows the object to be found later based
     # on the interfaces it implements.
     ##
-    def addObject(self, object):
+    def addObject(object):
         PluginManager.mInstance.mObjects.append(object)
         PluginManager.mInstance.objectAdded.emit([object])
        
@@ -127,7 +127,7 @@ class PluginManager(QObject):
             if hasattr(instance, 'initialize'):
                 instance().initialize()
             else:
-                self.addObject(instance())
+                PluginManager.addObject(instance())
 
     ##
     # Returns the list of plugins found by the plugin manager.

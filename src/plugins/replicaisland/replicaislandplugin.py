@@ -26,19 +26,27 @@ from tileset import Tileset
 from mapformat import MapFormat
 from map import Map
 from pyqtcore import (
-    QList,
+    QVector,
     QString
 )
 from PyQt5.QtCore import (
     QDataStream,
     QFileInfo,
     QFile,
-    QTemporaryFile,
+    QSaveFile,
     QIODevice
 )
 from PyQt5.QtGui import (
     QImage
 )
+
+
+def tilesetForLayer(type, tileIndex, typeTilesets, tileIndexTilesets):
+    if type==0:
+        return tileIndexTilesets[tileIndex]
+    else:
+        return typeTilesets[type]
+
 ##
 # Read and write maps in Replica Island format.  Replica Island is an
 # open source side-scrolling video game for Android.
@@ -76,8 +84,8 @@ class ReplicaIslandPlugin(MapFormat):
         map = Map(Map.Orientation.Orthogonal, 0, 0, 32, 32)
         map.setProperty("background_index", QString.number(backgroundIndex))
         # Load our Tilesets.
-        typeTilesets = QList()
-        tileIndexTilesets = QList()
+        typeTilesets = QVector()
+        tileIndexTilesets = QVector()
         
         self.loadTilesetsFromResources(map, typeTilesets, tileIndexTilesets)
         # Load each of our layers.
@@ -109,7 +117,7 @@ class ReplicaIslandPlugin(MapFormat):
             layer.setProperty("scroll_speed", QString.number(scrollSpeed, 'f'))
             map.addLayer(layer)
             # Look up the tileset for this layer.
-            tileset = self.tilesetForLayer(_type, tileIndex, typeTilesets, tileIndexTilesets)
+            tileset = tilesetForLayer(_type, tileIndex, typeTilesets, tileIndexTilesets)
             # Read our tile data all at once.
             #tileData = QByteArray(width*height, b'\x00')
             bytesNeeded = width*height
@@ -135,12 +143,6 @@ class ReplicaIslandPlugin(MapFormat):
             return 0
         
         return map
-
-    def tilesetForLayer(self, _type, tileIndex, typeTilesets, tileIndexTilesets):
-        if (_type == 0):
-            return tileIndexTilesets[tileIndex]
-        else:
-            return typeTilesets[_type]
         
     def nameFilter(self):
         return self.tr("Replica Island map files (*.bin)")
@@ -164,13 +166,13 @@ class ReplicaIslandPlugin(MapFormat):
     # MapWriterInterface
     def write(self, map, fileName):
         # Open up a temporary file for saving the level.
-        temp = QTemporaryFile()
-        if (not temp.open()):
-            self.mError = self.tr("Cannot open temporary file for writing!")
+        file = QSaveFile(fileName)
+        if (not file.open(QIODevice.WriteOnly)):
+            self.mError = self.tr("Could not open temporary file for writing.")
             return False
         
         # Create an output stream for serializing data.
-        out = QDataStream(temp)
+        out = QDataStream(file)
         out.setByteOrder(QDataStream.LittleEndian)
         out.setFloatingPointPrecision(QDataStream.SinglePrecision)
         # Write out the signature and file header.
@@ -192,16 +194,11 @@ class ReplicaIslandPlugin(MapFormat):
             if (not self.writeLayer(out, layer)):
                 return False
         
-        # Overwrite our destination file with our temporary file.  We only
-        # do this once we know we've saved a valid map.
-        temp.close()
-        QFile.remove(fileName)
-        if (not QFile.copy(temp.fileName(), fileName)):
-            self.mError = self.tr("Couldn't overwrite old version; may be deleted!")
-            return False
+            if not file.commit():
+                self.mError = file.errorString()
+                return False
         
         return True
-
 
     # MapReaderInterface support.
     def loadTilesetsFromResources(self, map, typeTilesets, tileIndexTilesets):
@@ -228,9 +225,9 @@ class ReplicaIslandPlugin(MapFormat):
         return tileset
     
     def addTilesetsToMap(self, map, tilesets):
-        for i in tilesets:
-            if i:
-                map.addTileset(i)
+        for tileset in tilesets:
+            if tileset:
+                map.addTileset(tileset)
     
     def layerTypeToName(self, _type):
         x = _type

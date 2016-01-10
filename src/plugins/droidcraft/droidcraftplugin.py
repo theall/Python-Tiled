@@ -24,9 +24,10 @@ from tileset import Tileset
 from map import Map
 from mapformat import MapFormat
 from PyQt5.QtCore import (
+    QFile, 
     QFileInfo,
     QIODevice,
-    QFile,
+    QSaveFile,
     QByteArray
 )
 from PyQt5.QtGui import (
@@ -54,7 +55,7 @@ class DroidcraftPlugin(MapFormat):
         # Check the data
         if (uncompressed.count() != 48 * 48) :
             self.mError = self.tr("This is not a valid Droidcraft map file!")
-            return 0
+            return None
         
         uncompressed = uncompressed.data()
         # Build 48 x 48 map
@@ -107,13 +108,16 @@ class DroidcraftPlugin(MapFormat):
         compressed = compress(uncompressed, CompressionMethod.Gzip)
         
         # Write QByteArray
-        file = QFile(fileName)
+        file = QSaveFile(fileName)
         if (not file.open(QIODevice.WriteOnly)) :
             self.mError = self.tr("Could not open file for writing.")
             return False
         
         file.write(compressed)
-        file.close()
+        if not file.commit():
+            self.mError = file.errorString()
+            return False
+
         return True
     
     def nameFilter(self):

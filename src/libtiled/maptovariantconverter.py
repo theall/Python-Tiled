@@ -34,14 +34,9 @@ from map import (
     staggerIndexToString
 )
 from gidmapper import GidMapper
-from pyqtcore import (
-    QMap, 
-    QString,
-    QList
-)
+from pyqtcore import QString
 from PyQt5.QtCore import (
-    QDir,
-    QVariant
+    QDir
 )
 ##
 # Converts Map instances to QVariant. Meant to be used together with
@@ -65,7 +60,7 @@ class MapToVariantConverter():
             map, mapDir = arg1, arg2
             self.mMapDir = mapDir
             self.mGidMapper.clear()
-            mapVariant = QMap()
+            mapVariant = {}
             mapVariant["version"] = 1.0
             mapVariant["orientation"] = orientationToString(map.orientation())
             mapVariant["renderorder"] = renderOrderToString(map.renderOrder())
@@ -75,17 +70,17 @@ class MapToVariantConverter():
             mapVariant["tileheight"] = map.tileHeight()
             mapVariant["properties"] = self.__toVariant(map.properties())
             mapVariant["nextobjectid"] = map.nextObjectId()
-            if (map.orientation() == Map.Hexagonal) :
+            if (map.orientation() == Map.Orientation.Hexagonal) :
                 mapVariant["hexsidelength"] = map.hexSideLength()
             
-            if (map.orientation() == Map.Hexagonal or map.orientation() == Map.Staggered) :
+            if (map.orientation() == Map.Orientation.Hexagonal or map.orientation() == Map.Orientation.Staggered) :
                 mapVariant["staggeraxis"] = staggerAxisToString(map.staggerAxis())
                 mapVariant["staggerindex"] = staggerIndexToString(map.staggerIndex())
             
             bgColor = map.backgroundColor()
             if (bgColor.isValid()):
                 mapVariant["backgroundcolor"] = bgColor.name()
-            tilesetVariants = QList()
+            tilesetVariants = []
             firstGid = 1
             for tileset in map.tilesets():
                 tilesetVariants.append(self.__toVariant(tileset, firstGid))
@@ -93,21 +88,16 @@ class MapToVariantConverter():
                 firstGid += tileset.tileCount()
             
             mapVariant["tilesets"] = tilesetVariants
-            layerVariants = QList()
+            layerVariants = []
             for layer in map.layers():
                 x = layer.layerType()
-                if False:
-                    pass
-                elif x==Layer.TileLayerType:
+                if x==Layer.TileLayerType:
                     layerVariants.append(self.__toVariant(layer, map.layerDataFormat()))
-                    break
                 elif x==Layer.ObjectGroupType:
                     layerVariants.append(self.__toVariant(layer))
-                    break
                 elif x==Layer.ImageLayerType:
                     layerVariants.append(self.__toVariant(layer))
-                    break
-
+            
             mapVariant["layers"] = layerVariants
             return mapVariant
         elif tp1==Tileset and tp2==QDir:
@@ -121,32 +111,32 @@ class MapToVariantConverter():
         
     def __toVariant(self, *args):
         l = len(args)
-        if l==0:
+        if l==1:
             arg = args[0]
             tp = type(arg)
             if tp == Properties:
                 properties = arg
-                variantMap = QMap()
+                variantMap = {}
                 for it in properties:
                     variantMap[it[0]] = it[1]
                 return variantMap
             elif tp == ObjectGroup:
                 objectGroup = arg
-                objectGroupVariant = QMap()
+                objectGroupVariant = {}
                 objectGroupVariant["type"] = "objectgroup"
                 if (objectGroup.color().isValid()):
                     objectGroupVariant["color"] = objectGroup.color().name()
                 objectGroupVariant["draworder"] = drawOrderToString(objectGroup.drawOrder())
                 self.addLayerAttributes(objectGroupVariant, objectGroup)
-                objectVariants = QList()
+                objectVariants = []
                 for object in objectGroup.objects():
-                    objectVariant = QMap()
+                    objectVariant = {}
                     name = object.name()
-                    type = object.type()
+                    _type = object.type()
                     objectVariant["properties"] = self.__toVariant(object.properties())
                     objectVariant["id"] = object.id()
                     objectVariant["name"] = name
-                    objectVariant["type"] = type
+                    objectVariant["type"] = _type
                     if (not object.cell().isEmpty()):
                         objectVariant["gid"] = self.mGidMapper.cellToGid(object.cell())
                     objectVariant["x"] = object.x()
@@ -165,9 +155,9 @@ class MapToVariantConverter():
                     ##
                     polygon = object.polygon()
                     if (not polygon.isEmpty()) :
-                        pointVariants = QList()
+                        pointVariants = []
                         for point in polygon:
-                            pointVariant = QMap()
+                            pointVariant = {}
                             pointVariant["x"] = point.x()
                             pointVariant["y"] = point.y()
                             pointVariants.append(pointVariant)
@@ -185,7 +175,7 @@ class MapToVariantConverter():
                 return objectGroupVariant
             elif tp == ImageLayer:
                 imageLayer = arg
-                imageLayerVariant = QMap()
+                imageLayerVariant = {}
                 imageLayerVariant["type"] = "imagelayer"
                 self.addLayerAttributes(imageLayerVariant, imageLayer)
                 rel = self.mMapDir.relativeFilePath(imageLayer.imageSource())
@@ -200,7 +190,7 @@ class MapToVariantConverter():
             tp2 = type(arg2)
             if tp1==Tileset and tp2==int:
                 tileset, firstGid = arg1, arg2
-                tilesetVariant = QMap()
+                tilesetVariant = {}
                 
                 if firstGid > 0:
                     tilesetVariant["firstgid"] = firstGid
@@ -222,14 +212,14 @@ class MapToVariantConverter():
                 tilesetVariant["properties"] = self.__toVariant(tileset.properties())
                 offset = tileset.tileOffset()
                 if (not offset.isNull()) :
-                    tileOffset = QMap()
+                    tileOffset = {}
                     tileOffset["x"] = offset.x()
                     tileOffset["y"] = offset.y()
                     tilesetVariant["tileoffset"] = tileOffset
                 
                 # Write the image element
                 imageSource = tileset.imageSource()
-                if (not imageSource.isEmpty()) :
+                if imageSource != '':
                     rel = self.mMapDir.relativeFilePath(tileset.imageSource())
                     tilesetVariant["image"] = rel
                     transColor = tileset.transparentColor()
@@ -238,19 +228,22 @@ class MapToVariantConverter():
                     tilesetVariant["imagewidth"] = tileset.imageWidth()
                     tilesetVariant["imageheight"] = tileset.imageHeight()
                 
-                # Write the properties, terrain, external image, object group and # animation for those tiles that have them.
-                tilePropertiesVariant = QMap()
-                tilesVariant = QMap()
+                ##
+                # Write the properties, terrain, external image, object group and
+                # animation for those tiles that have them.
+                ##
+                tilePropertiesVariant = {}
+                tilesVariant = {}
                 for i in range(0, tileset.tileCount()):
                     tile = tileset.tileAt(i)
                     properties = tile.properties()
                     if (not properties.isEmpty()):
                         tilePropertiesVariant[QString.number(i)] = self.__toVariant(properties)
-                    tileVariant = QMap()
+                    tileVariant = {}
                     if (tile.terrain() != 0xFFFFFFFF) :
-                        terrainIds = QList()
+                        terrainIds = []
                         for j in range(0, 4):
-                            terrainIds.append(QVariant(tile.cornerTerrainId(j)))
+                            terrainIds.append(tile.cornerTerrainId(j))
                         tileVariant["terrain"] = terrainIds
                     
                     if (tile.probability() != 1.0):
@@ -262,29 +255,29 @@ class MapToVariantConverter():
                     if (tile.objectGroup()):
                         tileVariant["objectgroup"] = self.__toVariant(tile.objectGroup())
                     if (tile.isAnimated()) :
-                        frameVariants = QList()
+                        frameVariants = []
                         for frame in tile.frames():
-                            frameVariant = QMap()
+                            frameVariant = {}
                             frameVariant["tileid"] = frame.tileId
                             frameVariant["duration"] = frame.duration
                             frameVariants.append(frameVariant)
                         
                         tileVariant["animation"] = frameVariants
                     
-                    if (not tileVariant.empty()):
+                    if len(tileVariant) > 0:
                         tilesVariant[QString.number(i)] = tileVariant
                 
-                if (not tilePropertiesVariant.empty()):
+                if len(tilePropertiesVariant) > 0:
                     tilesetVariant["tileproperties"] = tilePropertiesVariant
-                if (not tilesVariant.empty()):
+                if len(tilesVariant) > 0:
                     tilesetVariant["tiles"] = tilesVariant
                 # Write terrains
                 if (tileset.terrainCount() > 0) :
-                    terrainsVariant = QList()
+                    terrainsVariant = []
                     for i in range(0, tileset.terrainCount()):
                         terrain = tileset.terrain(i)
                         properties = terrain.properties()
-                        terrainVariant = QMap()
+                        terrainVariant = {}
                         terrainVariant["name"] = terrain.name()
                         if (not properties.isEmpty()):
                             terrainVariant["properties"] = self.__toVariant(properties)
@@ -294,14 +287,14 @@ class MapToVariantConverter():
                     tilesetVariant["terrains"] = terrainsVariant
                 
                 return tilesetVariant
-            elif tp1==TileLayer and tp2==int:
+            elif tp1==TileLayer and tp2==Map.LayerDataFormat:
                 tileLayer, format = arg1, arg2
-                tileLayerVariant = QMap()
+                tileLayerVariant = {}
                 tileLayerVariant["type"] = "tilelayer"
                 self.addLayerAttributes(tileLayerVariant, tileLayer)
                 
                 if format == Map.LayerDataFormat.XML or format == Map.LayerDataFormat.CSV:
-                    tileVariants = QList()
+                    tileVariants = []
                     for y in range(tileLayer.height()):
                         for x in range(tileLayer.width()):
                             tileVariants.append(self.mGidMapper.cellToGid(tileLayer.cellAt(x, y)))
@@ -315,9 +308,10 @@ class MapToVariantConverter():
                         tileLayerVariant["compression"] = "gzip"
 
                     layerData = self.mGidMapper.encodeLayerData(tileLayer, format)
-                    tileLayerVariant["data"] = layerData
+                    tileLayerVariant["data"] = layerData.data().decode()
                     
                 return tileLayerVariant
+                
     def addLayerAttributes(self, layerVariant, layer):
         layerVariant["name"] = layer.name()
         layerVariant["width"] = layer.width()

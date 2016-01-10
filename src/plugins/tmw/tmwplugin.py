@@ -21,7 +21,7 @@
 from mapformat import WritableMapFormat
 from PyQt5.QtCore import (
     QDataStream,
-    QFile,
+    QSaveFile,
     QIODevice
 )
 class TmwPlugin(WritableMapFormat):
@@ -32,7 +32,7 @@ class TmwPlugin(WritableMapFormat):
 
     # MapWriterInterface
     def write(self, map, fileName):
-        collisionLayer = 0
+        collisionLayer = None
         for layer in map.layers():
             if layer.name().lower() == "collision":
                 tileLayer = layer.asTileLayer()
@@ -48,7 +48,7 @@ class TmwPlugin(WritableMapFormat):
             self.mError = self.tr("No collision layer found!")
             return False
         
-        file = QFile(fileName)
+        file = QSaveFile(fileName)
         if (not file.open(QIODevice.WriteOnly)) :
             self.mError = self.tr("Could not open file for writing.")
             return False
@@ -63,6 +63,10 @@ class TmwPlugin(WritableMapFormat):
             for x in range(0, width):
                 tile = collisionLayer.cellAt(x, y).tile
                 stream.writeInt8(int(tile and tile.id()> 0)&0xff)
+
+        if not file.commit():
+            self.mError = file.errorString()
+            return False
 
         return True
     

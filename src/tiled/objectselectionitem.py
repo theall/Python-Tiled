@@ -241,7 +241,7 @@ class MapObjectOutline(QGraphicsItem):
         
         self.mObject = object
         self.mBoundingRect = QRectF()
-        self.setZValue(1); # makes sure outlines are above labels
+        self.setZValue(1) # makes sure outlines are above labels
     
     def syncWithMapObject(self, renderer):
         pixelPos = renderer.pixelToScreenCoords_(self.mObject.position())

@@ -28,7 +28,7 @@ from pyqtcore import (
     QHash
 )
 from PyQt5.QtCore import (
-    QFile,
+    QSaveFile,
     Qt,
     QIODevice,
     QTextStream
@@ -45,7 +45,7 @@ class TenginePlugin(WritableMapFormat):
 
     # MapWriterInterface
     def write(self, map, fileName):
-        file = QFile(fileName)
+        file = QSaveFile(fileName)
         if (not file.open(QIODevice.WriteOnly | QIODevice.Text)) :
             self.mError = self.tr("Could not open file for writing.")
             return False
@@ -259,8 +259,10 @@ class TenginePlugin(WritableMapFormat):
             else :
                 out << lineStop << '\n'
 
-        # And close the file
-        file.close()
+        if not file.commit():
+            self.mError = file.errorString()
+            return False
+
         return True
     
     def nameFilter(self):

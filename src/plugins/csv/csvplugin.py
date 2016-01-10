@@ -36,48 +36,49 @@ class CsvPlugin(WritableMapFormat):
         self.mError = ''
 
     # MapWriterInterface
-    def write(self, map, fileName):
-        file = QSaveFile(fileName)
-        if (not file.open(QIODevice.WriteOnly | QIODevice.Text)) :
-            self.mError = self.tr("Could not open file for writing.")
-            return False
-        
-        tileLayer = 0
-        # Take the first tile layer
+    def write(self, map, fileName):       
+        # Get file paths for each layer
+        layerPaths = self.outputFiles(map, fileName)
+
+        # Traverse all tile layers
+        currentLayer = 0
         for layer in map.layers():
-            if (layer.layerType() == Layer.TileLayerType):
-                tileLayer = layer
-                break
+            if layer.layerType() != Layer.TileLayerType:
+                continue
+            
+            tileLayer = layer
 
-        if (not tileLayer):
-            self.mError = self.tr("No tile layer found.")
-            return False
-        
-        # Write out tiles either by ID or their name, if given. -1 is "empty"
-        for y in range(0, tileLayer.height()):
-            for x in range(0, tileLayer.width()):
-                if (x > 0):
-                    file.write(",")
-                cell = tileLayer.cellAt(x, y)
-                tile = cell.tile
-                if (tile and tile.hasProperty("name")) :
-                    file.write(tile.property("name").encode())
-                else:
-                    if tile:
-                        id = tile.id()
+            file = QSaveFile(layerPaths[currentLayer])
+
+            if (not file.open(QIODevice.WriteOnly | QIODevice.Text)):
+                self.mError = self.tr("Could not open file for writing.")
+                return False
+            
+            # Write out tiles either by ID or their name, if given. -1 is "empty"
+            for y in range(0, tileLayer.height()):
+                for x in range(0, tileLayer.width()):
+                    if (x > 0):
+                        file.write(",")
+                    cell = tileLayer.cellAt(x, y)
+                    tile = cell.tile
+                    if (tile and tile.hasProperty("name")) :
+                        file.write(tile.property("name").encode())
                     else:
-                        id = -1
-                    file.write(QByteArray.number(id))
+                        if tile:
+                            id = tile.id()
+                        else:
+                            id = -1
+                        file.write(QByteArray.number(id))
 
-            file.write("\n")
-        
-        if (file.error() != QFile.NoError) :
-            self.mError = file.errorString()
-            return False
-        
-        if (not file.commit()) :
-            self.mError = file.errorString()
-            return False
+                file.write("\n")
+            
+            if (file.error() != QFile.NoError) :
+                self.mError = file.errorString()
+                return False
+            
+            if (not file.commit()) :
+                self.mError = file.errorString()
+                return False
 
         return True
     

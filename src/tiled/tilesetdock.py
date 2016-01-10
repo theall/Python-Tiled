@@ -273,7 +273,7 @@ class TilesetDock(QDockWidget):
                 if tile:
                     if (processed.contains(tile)):
                         continue
-                    processed.insert(tile); # avoid spending time on duplicates
+                    processed.insert(tile) # avoid spending time on duplicates
                     tileset = tile.tileset()
                     tilesetIndex = self.mTilesets.indexOf(tileset.sharedPointer())
                     if (tilesetIndex != -1):
