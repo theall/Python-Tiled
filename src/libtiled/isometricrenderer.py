@@ -205,15 +205,15 @@ class IsometricRenderer(MapRenderer):
         shifted = inUpperHalf ^ inLeftHalf
         renderer = CellRenderer(painter)
 
-        y = startPos.y()
-        while(y - tileHeight < rect.bottom()):
+        y = startPos.y() * 2
+        while(y - tileHeight*2 < rect.bottom()*2):
             columnItr = QPoint(rowItr)
             x = startPos.x()
             while(x < rect.right()):
                 if (layer.contains(columnItr)):
                     cell = layer.cellAt(columnItr)
                     if (not cell.isEmpty()):
-                        renderer.render(cell, QPointF(x, y), QSizeF(0, 0),
+                        renderer.render(cell, QPointF(x, y/2), QSizeF(0, 0),
                                         CellRenderer.BottomLeft)
 
                 # Advance to the next column
@@ -230,7 +230,7 @@ class IsometricRenderer(MapRenderer):
                 rowItr.setY(rowItr.y() + 1)
                 startPos.setX(startPos.x() - tileWidth / 2)
                 shifted = False
-            y += int(tileHeight / 2)
+            y += tileHeight
 
     def drawTileSelection(self, painter, region, color, exposed):
         painter.setBrush(color)

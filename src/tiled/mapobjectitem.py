@@ -78,7 +78,7 @@ class MapObjectItem(QGraphicsItem):
     def syncWithMapObject(self):
         color = MapObjectItem.objectColor(self.mObject)
         
-        # Update the whole object when the name or polygon has changed
+        #  Update the whole object when the name, polygon or color has changed
         if (self.mObject.name() != self.mName or self.mObject.polygon() != self.mPolygon or self.mColor != color):
             self.mName = self.mObject.name()
             self.mPolygon = self.mObject.polygon()

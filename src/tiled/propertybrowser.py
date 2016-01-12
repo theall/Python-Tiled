@@ -40,6 +40,7 @@ from changeimagelayerposition import ChangeImageLayerPosition
 from changelayer import SetLayerVisible, SetLayerOpacity
 from libtiled.tiled import FlipDirection
 from layer import Layer
+from tileset import Tileset
 from properties import Properties
 from pyqtcore import QStringList, QHash, QList, dynamic_cast
 from qttreepropertybrowser import QtTreePropertyBrowser
@@ -501,8 +502,8 @@ class PropertyBrowser(QtTreePropertyBrowser):
         self.createProperty(PropertyId.TileOffsetProperty, QVariant.Point, self.tr("Drawing Offset"), groupProperty)
         
         # Next properties we should add only for non 'Collection of Images' tilesets
-        currentTileset = dynamic_cast(self.mObject)
-        if currentTileset.imageSource() != '':
+        currentTileset = dynamic_cast(self.mObject, Tileset)
+        if currentTileset and currentTileset.imageSource() != '':
             srcImgProperty = self.createProperty(PropertyId.SourceImageProperty, QVariant.String, self.tr("Source Image"), groupProperty)
             tileWidthProperty = self.createProperty(PropertyId.TileWidthProperty, QVariant.Int, self.tr("Tile Width"), groupProperty)
             tileHeightProperty = self.createProperty(PropertyId.TileHeightProperty, QVariant.Int, self.tr("Tile Height"), groupProperty)
@@ -583,8 +584,8 @@ class PropertyBrowser(QtTreePropertyBrowser):
         x = id
         if x==PropertyId.NameProperty or x==PropertyId.TypeProperty:
             command = ChangeMapObject(self.mMapDocument, mapObject,
-                                          self.mIdToProperty[PropertyId.NameProperty],
-                                          self.mIdToProperty[PropertyId.TypeProperty])
+                                          self.mIdToProperty[PropertyId.NameProperty].value(),
+                                          self.mIdToProperty[PropertyId.TypeProperty].value())
         elif x==PropertyId.VisibleProperty:
             command = SetMapObjectVisible(self.mMapDocument, mapObject, val)
         elif x==PropertyId.XProperty:

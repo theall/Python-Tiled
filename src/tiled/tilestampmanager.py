@@ -22,6 +22,8 @@
 from tilestampmodel import TileStampModel
 import preferences
 from map import Map
+from stampbrush import StampBrush
+from tilelayer import TileLayer
 from documentmanager import DocumentManager
 from bucketfilltool import BucketFillTool
 from tilestamp import TileStamp
@@ -69,7 +71,7 @@ def findStampFileName(name, currentFileName=''):
 
 def stampFromContext(selectedTool):
     stamp = TileStamp()
-    stampBrush = dynamic_cast(selectedTool)
+    stampBrush = dynamic_cast(selectedTool, StampBrush)
     if stampBrush:
         # take the stamp from the stamp brush
         stamp = stampBrush.stamp()
@@ -82,7 +84,7 @@ def stampFromContext(selectedTool):
             mapDocument = DocumentManager.instance().currentDocument()
             if mapDocument:
                 # try making a stamp from the current tile selection
-                tileLayer = dynamic_cast(mapDocument.currentLayer())
+                tileLayer = dynamic_cast(mapDocument.currentLayer(), TileLayer)
                 if (not tileLayer):
                     return stamp
                 selection = mapDocument.selectedArea()

@@ -38,6 +38,7 @@ from pyqtcore import QStringList
 from PyQt5.QtGui import (
     QImage,
     QPainter,
+    QImageWriter, 
     QTransform
 )
 from PyQt5.QtCore import (
@@ -130,10 +131,11 @@ class TmxRasterizer():
         painter.end()
         
         # Save image
-        image.save(imageFileName)
-        del renderer
-        map.tilesets().clear()
-        del map
+        imageWriter = QImageWriter(imageFileName)
+        if (not imageWriter.write(image)):
+            qWarning("Error while writing " + imageFileName + ": " + imageWriter.errorString())
+            return 1
+    
         return 0
 
     def shouldDrawLayer(self, layer):
