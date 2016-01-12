@@ -220,14 +220,12 @@ class DocumentManager(QObject):
     def closeDocumentAt(self, index):
         mapDocument = self.mDocuments.at(index)
         self.documentAboutToClose.emit(mapDocument)
-        mapViewContainer = self.mTabWidget.widget(index)
+
         self.mDocuments.removeAt(index)
         self.mTabWidget.removeTab(index)
-        mapViewContainer.close()
-        #del mapViewContainer
+        
         if (mapDocument.fileName() != ''):
             self.mFileSystemWatcher.removePath(mapDocument.fileName())
-        #del mapDocument
 
     ##
     # Reloads the current document. Will not ask the user whether to save any
@@ -251,7 +249,6 @@ class DocumentManager(QObject):
     def reloadDocumentAt(self, index):
         oldDocument = self.mDocuments.at(index)
         
-
         newDocument, error = MapDocument.load(oldDocument.fileName(), oldDocument.readerFormat())
         if (not newDocument):
             self.reloadError.emit(self.tr("%s:\n\n%s"%(oldDocument.fileName(), error)))
@@ -354,10 +351,11 @@ class DocumentManager(QObject):
             mapScene = self.mViewWithTool.mapScene()
             mapScene.disableSelectedTool()
             self.mViewWithTool = None
-
+        
         mapDocument = self.currentDocument()
         if (mapDocument):
             self.mUndoGroup.setActiveStack(mapDocument.undoStack())
+
         self.currentDocumentChanged.emit([mapDocument])
         
         mapView = self.currentMapView()
@@ -462,7 +460,11 @@ class MapViewContainer(QWidget):
         self.setLayout(layout)
         self.mWarning.reload.connect(self.reload)
         self.mWarning.ignore.connect(self.mWarning.hide)
-
+        
+    def __del__(self):
+        del self.mMapView
+        del self.mWarning
+        
     def mapView(self):
         return self.mMapView
 

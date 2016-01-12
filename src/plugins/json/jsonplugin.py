@@ -150,9 +150,9 @@ class JsonMapFormat(MapFormat):
 
     def supportsFile(self, fileName):
         if (self.mSubFormat == JsonMapFormat.SubFormat.Json):
-            return fileName.endswith(".json", Qt.CaseInsensitive)
+            return fileName.lower().endswith(".json")
         else:
-            return fileName.endswith(".js", Qt.CaseInsensitive)
+            return fileName.lower().endswith(".js")
 
     def errorString(self):
         return self.mError

@@ -120,7 +120,8 @@ class PropertiesDock(QDockWidget):
         return super().event(event)
 
     def mapDocumentChanged(self, mapDocument):
-        mapDocument = mapDocument[0]
+        if type(mapDocument)==list:
+            mapDocument = mapDocument[0]
         if (self.mMapDocument):
             self.mMapDocument.disconnect()
         self.mMapDocument = mapDocument

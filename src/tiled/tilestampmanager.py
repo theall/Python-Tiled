@@ -155,7 +155,7 @@ class TileStampManager(QObject):
         return stamp
     
     def addVariation(self, targetStamp):
-        stamp = self.stampFromContext(self.mToolManager.selectedTool())
+        stamp = stampFromContext(self.mToolManager.selectedTool())
         if (stamp.isEmpty()):
             return
         if (stamp == targetStamp): # avoid easy mistake of adding duplicates
@@ -169,7 +169,7 @@ class TileStampManager(QObject):
             self.setStamp.emit(stamp)
     
     def createQuickStamp(self, index):
-        stamp = self.stampFromContext(self.mToolManager.selectedTool())
+        stamp = stampFromContext(self.mToolManager.selectedTool())
         if (stamp.isEmpty()):
             return
         self.setQuickStamp(index, stamp)

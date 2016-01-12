@@ -23,25 +23,28 @@ from mapreader import MapReader
 from mapwriter import MapWriter
 from pyqtcore import QString
 from PyQt5.QtCore import (
-    Qt,
-    qWarning,
-    QObject
+    qWarning, 
+    QCoreApplication
 )
 class ConverterControl():
 
     def __init__(self):
         pass
+        
+    def tr(self, sourceText, disambiguation = '', n = -1):
+        return QCoreApplication.translate('MapReader', sourceText, disambiguation, n)
+        
     def version1(self):
-        return QObject.tr("v0.8 and before")
+        return self.tr("v0.8 and before")
 
     def version2(self):
-        return QObject.tr("v0.9 and later")
+        return self.tr("v0.9 and later")
 
     def versionUnknown(self):
-        return QObject.tr("unknown")
+        return self.tr("unknown")
 
     def versionNotAMap(self):
-        return QObject.tr("not a map")
+        return self.tr("not a map")
 
     def automappingRuleFileVersion(self, fileName):
         reader = MapReader()
@@ -51,7 +54,7 @@ class ConverterControl():
         # version 1 check
         hasonlyruleprefix = True
         for layer in map.layers():
-            if (not layer.name().startsWith("rule", Qt.CaseInsensitive)):
+            if (not layer.name().lower().startswith("rule")):
                 hasonlyruleprefix = False
 
         if (hasonlyruleprefix):
@@ -63,15 +66,15 @@ class ConverterControl():
         allused = True
         for layer in map.layers():
             isunused = True
-            if (layer.name().startsWith("input", Qt.CaseInsensitive)):
+            if (layer.name().lower().startswith("input")):
                 hasrule = True
                 isunused = False
 
-            if (layer.name().startsWith("output", Qt.CaseInsensitive)):
+            if (layer.name().lower().startswith("output")):
                 hasoutput = True
                 isunused = False
 
-            if (layer.name().toLower() == "regions"):
+            if (layer.name().lower() == "regions"):
                 hasregion = True
                 isunused = False
 
@@ -90,13 +93,13 @@ class ConverterControl():
             return
 
         for layer in map.layers():
-            if (layer.name().startsWith("ruleset", Qt.CaseInsensitive)):
+            if (layer.name().lower().startswith("ruleset")):
                 layer.setName("Input_set")
-            elif (layer.name().startsWith("rulenotset", Qt.CaseInsensitive)):
+            elif (layer.name().lower().startswith("rulenotset")):
                 layer.setName("InputNot_set")
-            elif (layer.name().startsWith("ruleregions", Qt.CaseInsensitive)):
+            elif (layer.name().lower().startswith("ruleregions")):
                 layer.setName("Regions")
-            elif (layer.name().startsWith("rule", Qt.CaseInsensitive)):
+            elif (layer.name().lower().startswith("rule")):
                 newname = layer.name().right(layer.name().length() - 4)
                 layer.setName("Output" + newname)
             else:

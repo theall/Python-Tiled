@@ -25,9 +25,9 @@ from PyQt5.QtCore import (
     QVariant,
     qWarning,
     QModelIndex,
-    QAbstractListModel
+    QAbstractTableModel
 )
-class ConverterDataModel(QAbstractListModel):
+class ConverterDataModel(QAbstractTableModel):
     def __init__(self, control, parent = None):
         super().__init__(parent)
 
@@ -40,7 +40,7 @@ class ConverterDataModel(QAbstractListModel):
         if parent.isValid():
             _x = 0
         else:
-            _x = self.mFileNames.count()
+            _x = len(self.mFileNames)
         return _x
 
     def columnCount(self, parent = QModelIndex()):
@@ -55,11 +55,11 @@ class ConverterDataModel(QAbstractListModel):
             return QVariant()
         rowIndex = index.row()
         columnIndex = index.column()
-        if (rowIndex <0 or self.mFileNames.count()):
+        if rowIndex <0 or len(self.mFileNames)==0:
             return QVariant()
         x = role
         if x==Qt.DisplayRole:
-            fileName = self.mFileNames.at(rowIndex)
+            fileName = self.mFileNames[rowIndex]
             if (columnIndex == 0):
                 return fileName
             elif (columnIndex == 1):
@@ -80,29 +80,29 @@ class ConverterDataModel(QAbstractListModel):
         return super().headerData(section, orientation, role)
 
     def insertFileNames(self, fileNames):
-        row = self.mFileNames.size()
-        self.beginInsertRows(QModelIndex(), row, row + fileNames.count() - 1)
-        self.mFileNames.append(fileNames)
+        row = len(self.mFileNames)
+        self.beginInsertRows(QModelIndex(), row, row + len(fileNames) - 1)
+        self.mFileNames += fileNames
         for fileName in fileNames:
-             self.mFileVersions[fileName] = self.mControl.automappingRuleFileVersion(fileName)
+            self.mFileVersions[fileName] = self.mControl.automappingRuleFileVersion(fileName)
         self.endInsertRows()
 
     def count(self):
-        return self.mFileNames.count()
+        return len(self.mFileNames)
 
     def fileName(self, i):
-        return self.mFileNames.at(i)
+        return self.mFileNames[i]
 
     def versionOfFile(self, fileName):
         return self.mFileVersions[fileName]
 
     def updateVersions(self):
         for i in range(self.count()):
-            fileName = self.mFileNames.at(i)
+            fileName = self.mFileNames[i]
             version = self.mFileVersions[fileName]
             qWarning("processing"+fileName+"at version"+version)
             if (version == self.mControl.version1()):
                 self.mControl.convertV1toV2(fileName)
                 self.mFileVersions[fileName] = self.mControl.version2()
 
-        self.dataChanged.emit(self.index(0), self.index(self.count()))
+        self.dataChanged.emit(self.index(0, 0), self.index(self.count(), 1))

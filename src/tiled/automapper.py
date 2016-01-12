@@ -186,7 +186,7 @@ class AutoMapper(QObject):
         self.mTouchedObjectGroups = QSet()
         self.mWarning = QString()
         self.mTouchedTileLayers = QSet()
-        self.mError = QString()
+        self.mError = ''
 
         if (not self.setupRuleMapProperties()):
             return
@@ -381,9 +381,9 @@ class AutoMapper(QObject):
         error = QString()
         for layer in self.mMapRules.layers():
             layerName = layer.name()
-            if (layerName.startsWith("regions", Qt.CaseInsensitive)):
+            if (layerName.lower().startswith("regions")):
                 treatAsBoth = layerName.toLower() == "regions"
-                if (layerName.endsWith("input", Qt.CaseInsensitive) or treatAsBoth):
+                if (layerName.lower().endswith("input") or treatAsBoth):
                     if (self.mLayerInputRegions):
                         error += self.tr("'regions_input' layer must not occur more than once.\n")
 
@@ -392,7 +392,7 @@ class AutoMapper(QObject):
                     else:
                         error += self.tr("'regions_*' layers must be tile layers.\n")
 
-                if (layerName.endsWith("output", Qt.CaseInsensitive) or treatAsBoth):
+                if (layerName.lower().endswith("output") or treatAsBoth):
                     if (self.mLayerOutputRegions):
                         error += self.tr("'regions_output' layer must not occur more than once.\n")
 
@@ -408,11 +408,11 @@ class AutoMapper(QObject):
             name = layerName.right(layerName.size() - nameStartPosition)
             # group is all before the underscore (included)
             index = layerName.left(nameStartPosition)
-            if (index.startsWith("output", Qt.CaseInsensitive)):
+            if (index.lower().startswith("output")):
                 index.remove(0, 6)
-            elif (index.startsWith("inputnot", Qt.CaseInsensitive)):
+            elif (index.lower().startswith("inputnot")):
                 index.remove(0, 8)
-            elif (index.startsWith("input", Qt.CaseInsensitive)):
+            elif (index.lower().startswith("input")):
                 index.remove(0, 5)
             # both 'rule' and 'output' layers will require and underscore and 
             # rely on the correct position detected of the underscore
@@ -421,8 +421,7 @@ class AutoMapper(QObject):
                 continue
 
             if (layerName.startsWith("input", Qt.CaseInsensitive)):
-                isNotList = layerName.startsWith("inputnot",
-                                                      Qt.CaseInsensitive)
+                isNotList = layerName.lower().startswith("inputnot")
                 if (not layer.isTileLayer()):
                     error += self.tr("'input_*' and 'inputnot_*' layers must be tile layers.\n")
                     continue
@@ -442,8 +441,7 @@ class AutoMapper(QObject):
                     self.mInputRules[index][name].listYes.append(layer.asTileLayer())
                 continue
 
-            if (layerName.startsWith("output",
-                                     Qt.CaseInsensitive)):
+            if layerName.lower().startswith("output"):
                 if (layer.isTileLayer()):
                     self.mTouchedTileLayers.insert(name)
                 else:

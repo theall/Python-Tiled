@@ -187,7 +187,7 @@ class TenginePlugin(WritableMapFormat):
         out << "\n-- addSpot section\n"
         for layer in map.layers():
             objectLayer = layer.asObjectGroup()
-            if (objectLayer and objectLayer.name().startsWith("addspot", Qt.CaseInsensitive)) :
+            if (objectLayer and objectLayer.name().lower().startsWith("addspot")):
                 for obj in objectLayer.objects():
                     propertyOrder = QList()
                     propertyOrder.append("type")
@@ -205,7 +205,7 @@ class TenginePlugin(WritableMapFormat):
         out << "\n-- addZone section\n"
         for layer in map.layers():
             objectLayer = layer.asObjectGroup()
-            if (objectLayer and objectLayer.name().startsWith("addzone", Qt.CaseInsensitive)) :
+            if (objectLayer and objectLayer.name().lower().startsWith("addzone")):
                 for obj in objectLayer.objects():
                     propertyOrder = QList()
                     propertyOrder.append("type")

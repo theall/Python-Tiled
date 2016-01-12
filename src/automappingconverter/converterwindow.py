@@ -19,7 +19,7 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from Ui_converterwindow import ui_MainWindow
+from Ui_converterwindow import Ui_MainWindow
 from convertercontrol import ConverterControl
 from converterdatamodel import ConverterDataModel
 
@@ -31,10 +31,12 @@ from PyQt5.QtWidgets import (
 )
 class ConverterWindow(QMainWindow):
     def __init__(self, parent = None):
-        self.ui = ui_MainWindow()
+        super().__init__(parent)
+        
+        self.ui = Ui_MainWindow()
         self.mControl = ConverterControl()
         self.mDataModel = ConverterDataModel(self.mControl, self)
-        self.ui.setupself.ui(self)
+        self.ui.setupUi(self)
         self.ui.saveButton.setText(self.tr("Save all as %s"%self.mControl.version2()))
         self.ui.addbutton.clicked.connect(self.addRule)
         self.ui.saveButton.clicked.connect(self.mDataModel.updateVersions)

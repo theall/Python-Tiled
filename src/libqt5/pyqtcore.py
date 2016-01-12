@@ -462,7 +462,17 @@ class QStringList(QList):
 
     def takeLast(self):
         return QString(super().takeLast())
-
+    
+    def contains(self, item, sensitive=True):
+        if not sensitive:
+            item = item.lower()
+        for i in self.__iter__():
+            if not sensitive:
+                i = i.lower()
+            if i==item:
+                return True
+        return False
+        
 class QHash(dict):
     def __init__(self, *args):
         super().__init__(args)

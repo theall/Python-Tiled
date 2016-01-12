@@ -1216,13 +1216,14 @@ class MainWindow(QMainWindow):
         self.mStatusInfoLabel.setText(statusInfo)
 
     def mapDocumentChanged(self, mapDocument):
-        mapDocument = mapDocument[0]
+        if type(mapDocument)==list:
+            mapDocument = mapDocument[0]
         if (self.mMapDocument):
             self.mMapDocument.disconnect()
         if (self.mZoomable):
             self.mZoomable.connectToComboBox(None)
             self.mZoomable.scaleChanged.disconnect(self.updateZoomLabel)
-
+        
         self.mZoomable = None
         self.mMapDocument = mapDocument
         self.mActionHandler.setMapDocument(mapDocument)
@@ -1235,6 +1236,7 @@ class MainWindow(QMainWindow):
         self.mTileCollisionEditor.setMapDocument(mapDocument)
         self.mToolManager.setMapDocument(mapDocument)
         self.mAutomappingManager.setMapDocument(mapDocument)
+        
         if (mapDocument):
             mapDocument.fileNameChanged.connect(self.updateWindowTitle)
             mapDocument.currentLayerIndexChanged.connect(self.updateActions)

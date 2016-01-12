@@ -75,7 +75,7 @@ class AutomappingManager(QObject):
         # Contains all errors which occurred until canceling.
         # If mError is not empty, no serious result can be expected.
         ##
-        self.mError = QString()
+        self.mError = ''
         ##
         # Contains all strings, which try to explain unusual and unexpected
         # behavior.
@@ -154,7 +154,7 @@ class AutomappingManager(QObject):
                 ret = False
                 continue
 
-            if (rulePath.endsWith(".tmx", Qt.CaseInsensitive)):
+            if (rulePath.lower().endswith(".tmx")):
                 tmxFormat = TmxMapFormat()
                 rules = tmxFormat.read(rulePath)
                 if (not rules):
@@ -174,7 +174,7 @@ class AutomappingManager(QObject):
                     self.mError += error
                     del autoMapper
 
-            if (rulePath.endsWith(".txt", Qt.CaseInsensitive)):
+            if (rulePath.lower().endswith(".txt")):
                 if (not self.loadFile(rulePath)):
                     ret = False
         return ret

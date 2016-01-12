@@ -82,12 +82,13 @@ class MiniMap(QFrame):
         if (self.mMapDocument):
             self.mMapDocument.disconnect()
             mapView = dm.viewForDocument(self.mMapDocument)
-            if mapView:
-                mapView.zoomable().disconnect()
-                mapView.horizontalScrollBar().disconnect()
-                mapView.verticalScrollBar().disconnect()
-
+#            if mapView:
+#                mapView.zoomable().disconnect()
+#                mapView.horizontalScrollBar().disconnect()
+#                mapView.verticalScrollBar().disconnect()
+        
         self.mMapDocument = map
+        
         if (self.mMapDocument):
             self.mMapDocument.undoStack().indexChanged.connect(self.scheduleMapImageUpdate)
             mapView = dm.viewForDocument(self.mMapDocument)
@@ -95,7 +96,7 @@ class MiniMap(QFrame):
                 mapView.horizontalScrollBar().valueChanged.connect(self.update)
                 mapView.verticalScrollBar().valueChanged.connect(self.update)
                 mapView.zoomable().scaleChanged.connect(self.update)
-
+            
         self.scheduleMapImageUpdate()
 
     def setRenderFlags(self, flags):
@@ -190,7 +191,6 @@ class MiniMap(QFrame):
             if (not self.mMouseMoveCursorState):
                 self.setCursor(Qt.OpenHandCursor)
                 self.mMouseMoveCursorState = True
-
         else:
             if (self.mMouseMoveCursorState):
                 self.unsetCursor()

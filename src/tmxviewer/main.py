@@ -27,20 +27,22 @@
 ##
 
 import sys
+sys.path.append('./../')
+sys.path.append('./../libtiled')
+sys.path.append('./../QtProperty')
+sys.path.append('./../libqt5')
+sys.path.append('./../tiled')
+sys.path.append('./../plugins')
 from tmxviewer import TmxViewer
-from pyqtcore import QString
+from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import (
-    qWarning,
-    QCoreApplication
-)
-from PyQt5.QtWidgets import (
-    QApplication
+    qWarning
 )
 class CommandLineOptions:
     def __init__(self):
         self.showHelp = False
         self.showVersion = False
-        self.fileToOpen = QString()
+        self.fileToOpen = ''
 
 def showHelp():
     # TODO: Make translatable
@@ -53,26 +55,26 @@ def showVersion():
     qWarning("TMX Map Viewer" + QApplication.applicationVersion())
 
 def parseCommandLineArguments(options):
-    arguments = QCoreApplication.arguments()
-    for i in range(1, arguments.size()):
-        arg = arguments.at(i)
+    arguments = sys.argv
+    for i in range(1, len(arguments)):
+        arg = arguments[i]
         if (arg == "--help") or arg == "-h":
             options.showHelp = True
         elif (arg == "--version"
                 or arg == "-v"):
             options.showVersion = True
-        elif (arg.at(0) == '-'):
+        elif arg[0] == '-':
             qWarning("Unknown option" + arg)
             options.showHelp = True
-        elif (options.fileToOpen.isEmpty()):
+        elif (options.fileToOpen==''):
             options.fileToOpen = arg
 
-def main(argc, *argv):
+def main(argv):
     # Avoid performance issues with X11 engine when rendering objects
     if sys.platform == 'linux':
         QApplication.setGraphicsSystem("raster")
 
-    a = QApplication(argc, argv)
+    a = QApplication(argv)
     a.setOrganizationDomain("mapeditor.org")
     a.setApplicationName("TmxViewer")
     a.setApplicationVersion("1.0")
@@ -80,11 +82,11 @@ def main(argc, *argv):
     parseCommandLineArguments(options)
     if (options.showVersion):
         showVersion()
-    if (options.showHelp or (options.fileToOpen.isEmpty() and not options.showVersion)):
+    if (options.showHelp or (options.fileToOpen=='' and not options.showVersion)):
         showHelp()
     if (options.showVersion
             or options.showHelp
-            or options.fileToOpen.isEmpty()):
+            or options.fileToOpen==''):
         return 0
     w = TmxViewer()
     if (not w.viewMap(options.fileToOpen)):
@@ -92,3 +94,5 @@ def main(argc, *argv):
     w.show()
     return a.exec()
 
+if __name__ == '__main__':
+    main(sys.argv)

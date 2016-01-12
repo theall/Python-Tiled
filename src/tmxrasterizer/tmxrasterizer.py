@@ -45,7 +45,6 @@ from PyQt5.QtCore import (
     qWarning
 )
 class TmxRasterizer():
-
     def __init__(self):
         self.mScale = 0.0
         self.mTileSize = 0
@@ -82,18 +81,12 @@ class TmxRasterizer():
         x = map.orientation()
         if x==Map.Orientation.Isometric:
             renderer = IsometricRenderer(map)
-            break
         elif x==Map.Orientation.Staggered:
             renderer = StaggeredRenderer(map)
-            break
         elif x==Map.Orientation.Hexagonal:
             renderer = HexagonalRenderer(map)
-            break
-        elif x==Map.Orientation.Orthogonal:
-            pass
         else:
             renderer = OrthogonalRenderer(map)
-            break
 
         if (self.mTileSize > 0):
             xScale = self.mTileSize / map.tileWidth()

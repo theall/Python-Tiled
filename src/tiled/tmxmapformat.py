@@ -94,7 +94,7 @@ class TmxMapFormat(MapFormat):
         return self.tr("Tiled map files (*.tmx)")
         
     def supportsFile(self, fileName):
-        return fileName.endswith(".tmx", Qt.CaseInsensitive)
+        return fileName.lower().endswith(".tmx")
         
     def errorString(self):
         return self.mError
@@ -131,7 +131,7 @@ class TsxTilesetFormat(TilesetFormat):
         return self.tr("Tiled tileset files (*.tsx)")
         
     def supportsFile(fileName):
-        return fileName.endsWith(".tsx", Qt.CaseInsensitive)
+        return fileName.lower().endswith(".tsx")
         
     def errorString(self):
         return self.mError

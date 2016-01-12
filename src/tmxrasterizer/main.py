@@ -25,9 +25,15 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
-#if QT_VERSION >= 0x050000
-#else
 
+import sys
+sys.path.append('./../')
+sys.path.append('./../libtiled')
+sys.path.append('./../QtProperty')
+sys.path.append('./../libqt5')
+sys.path.append('./../tiled')
+sys.path.append('./../plugins')
+from tiled_global import Int2, Float2
 from pyqtcore import QStringList
 from tmxrasterizer import TmxRasterizer
 from PyQt5.QtGui import (
@@ -41,6 +47,8 @@ class CommandLineOptions():
     def __init__(self):
         self.showHelp = False
         self.showVersion = False
+        self.fileToOpen = ''
+        self.fileToSave = ''
         self.scale = 1.0
         self.tileSize = 0
         self.useAntiAliasing = False
@@ -69,9 +77,10 @@ def showVersion():
     qWarning("TMX Map Rasterizer" + QCoreApplication.applicationVersion())
 
 def parseCommandLineArguments(options):
-    arguments = QCoreApplication.arguments()
-    for i in range(1, arguments.size()):
-        arg = arguments.at(i)
+    arguments = sys.argv
+    i = 1
+    while i < len(arguments):
+        arg = arguments[i]
         if (arg == "--help") or arg == "-h":
             options.showHelp = True
         elif (arg == "--version"
@@ -80,51 +89,51 @@ def parseCommandLineArguments(options):
         elif (arg == "--scale"
                 or arg == "-s"):
             i += 1
-            if (i >= arguments.size()):
+            if (i >= len(arguments)):
                 options.showHelp = True
             else:
-                scaleIsDouble = False
-                options.scale = arguments.at(i).toDouble(scaleIsDouble)
+                options.scale, scaleIsDouble = Float2(arguments[i])
                 if (not scaleIsDouble):
-                    qWarning(arguments.at(i) + ": the specified scale is not a number.")
+                    qWarning(arguments[i] + ": the specified scale is not a number.")
                     options.showHelp = True
         elif (arg == "--tilesize"
                 or arg == "-t"):
             i += 1
-            if (i >= arguments.size()):
+            if (i >= len(arguments)):
                 options.showHelp = True
             else:
-                tileSizeIsInt = False
-                options.tileSize = arguments.at(i).toInt(tileSizeIsInt)
+                options.tileSize, tileSizeIsInt = Int2(arguments[i])
                 if (not tileSizeIsInt):
-                    qWarning(arguments.at(i) + ": the specified tile size is not an integer.")
+                    qWarning(arguments[i] + ": the specified tile size is not an integer.")
                     options.showHelp = True
         elif (arg == "--hide-layer"):
             i += 1
-            if (i >= arguments.size()):
+            if (i >= len(arguments)):
                 options.showHelp = True
             else:
-                options.layersToHide.append(arguments.at(i))
+                options.layersToHide.append(arguments[i])
         elif (arg == "--anti-aliasing"
                 or arg == "-a"):
             options.useAntiAliasing = True
-        elif (arg == "--ignore-visibility"):
+        elif arg == "--ignore-visibility":
             options.ignoreVisibility = True
-        elif (arg.isEmpty()):
+        elif arg == '':
             options.showHelp = True
-        elif (arg.at(0) == '-'):
+        elif arg[0] == '-':
             qWarning("Unknown option" + arg)
             options.showHelp = True
-        elif (options.fileToOpen.isEmpty()):
+        elif options.fileToOpen == '':
             options.fileToOpen = arg
-        elif (options.fileToSave.isEmpty()):
+        elif options.fileToSave == '':
             options.fileToSave = arg
         else:
             # All args are already defined. Show help.
             options.showHelp = True
+            
+        i += 1
 
-def main(argc, *argv):
-    a = QGuiApplication(argc, argv)
+def main(argv):
+    a = QGuiApplication(argv)
 
     a.setOrganizationDomain("mapeditor.org")
     a.setApplicationName("TmxRasterizer")
@@ -135,7 +144,7 @@ def main(argc, *argv):
         showVersion()
         return 0
 
-    if (options.showHelp or options.fileToOpen.isEmpty() or options.fileToSave.isEmpty()):
+    if (options.showHelp or options.fileToOpen=='' or options.fileToSave==''):
         showHelp()
         return 0
 
@@ -154,3 +163,5 @@ def main(argc, *argv):
 
     return w.render(options.fileToOpen, options.fileToSave)
 
+if __name__ == '__main__':
+    main(sys.argv)

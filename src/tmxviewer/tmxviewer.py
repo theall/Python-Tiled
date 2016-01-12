@@ -47,7 +47,7 @@ from PyQt5.QtWidgets import (
 class TmxViewer(QGraphicsView):
     def __init__(self, parent = None):
         super().__init__(parent)
-        self.mScene(QGraphicsScene(self))
+        self.mScene = QGraphicsScene(self)
         self.mMap = None
         self.mRenderer = None
         self.setWindowTitle(self.tr("TMX Viewer"))
@@ -79,18 +79,12 @@ class TmxViewer(QGraphicsView):
         x = self.mMap.orientation()
         if x==Map.Orientation.Isometric:
             self.mRenderer = IsometricRenderer(self.mMap)
-            break
         elif x==Map.Orientation.Staggered:
             self.mRenderer = StaggeredRenderer(self.mMap)
-            break
         elif x==Map.Orientation.Hexagonal:
             self.mRenderer = HexagonalRenderer(self.mMap)
-            break
-        elif x==Map.Orientation.Orthogonal:
-            pass
         else:
             self.mRenderer = OrthogonalRenderer(self.mMap)
-            break
 
         self.mScene.addItem(MapItem(self.mMap, self.mRenderer))
         return True
@@ -108,7 +102,7 @@ class MapObjectItem(QGraphicsItem):
 
         position = mapObject.position()
         pixelPos = renderer.pixelToScreenCoords_(position)
-        boundingRect = renderer.boundingRect(mapObject)
+        boundingRect = QRectF(renderer.boundingRect(mapObject))
         boundingRect.translate(-pixelPos)
         self.mBoundingRect = boundingRect
         self.setPos(pixelPos)
@@ -137,14 +131,14 @@ class TileLayerItem(QGraphicsItem):
         self.mTileLayer = tileLayer
         self.mRenderer = renderer
 
-        self.setFlag(QGraphicsView.ItemUsesExtendedStyleOption)
+        self.setFlag(QGraphicsItem.ItemUsesExtendedStyleOption)
         self.setPos(self.mTileLayer.offset())
 
     def boundingRect(self):
-        return self.mRenderer.boundingRect(self.mTileLayer.bounds())
+        return QRectF(self.mRenderer.boundingRect(self.mTileLayer.bounds()))
 
     def paint(self, p, option, arg3):
-        self.mRenderer.drawTileLayer(p, self.mTileLayer, option.rect)
+        self.mRenderer.drawTileLayer(p, self.mTileLayer, option.exposedRect)
 
 ##
 # Item that represents an object group.
@@ -154,7 +148,7 @@ class ObjectGroupItem(QGraphicsItem):
     def __init__(self, objectGroup, renderer, parent = None):
         super().__init__(parent)
 
-        self.setFlag(QGraphicsView.ItemHasNoContents)
+        self.setFlag(QGraphicsItem.ItemHasNoContents)
         self.setPos(objectGroup.offset())
         
         drawOrder = objectGroup.drawOrder()
@@ -177,7 +171,7 @@ class MapItem(QGraphicsItem):
     def __init__(self, map, renderer, parent = None):
         super().__init__(parent)
 
-        self.setFlag(QGraphicsView.ItemHasNoContents)
+        self.setFlag(QGraphicsItem.ItemHasNoContents)
         # Create a child item for each layer
         for layer in map.layers():
             tileLayer = layer.asTileLayer()

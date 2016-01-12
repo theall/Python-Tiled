@@ -24,6 +24,7 @@ import preferences
 from objecttypesmodel import ObjectTypesModel
 from languagemanager import LanguageManager
 from Ui_preferencesdialog import Ui_PreferencesDialog
+from PyQt5.QtOpenGL import QGLFormat
 from PyQt5.QtCore import (
     Qt,
     QSize,
@@ -57,7 +58,7 @@ class PreferencesDialog(QDialog):
 
         self.mUi.setupUi(self)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
-        self.mUi.openGL.setEnabled(False)
+        self.mUi.openGL.setEnabled(QGLFormat.hasOpenGL())
         for name in self.mLanguages:
             locale = QLocale(name)
             string = "%s (%s)"%(QLocale.languageToString(locale.language()), QLocale.countryToString(locale.country()))
@@ -171,7 +172,7 @@ class PreferencesDialog(QDialog):
     def exportObjectTypes(self):
         prefs = preferences.Preferences.instance()
         lastPath = prefs.lastPath(preferences.Preferences.ObjectTypesFile)
-        if (not lastPath.endsWith(".xml")):
+        if (not lastPath.endswith(".xml")):
             lastPath.append("/objecttypes.xml")
         fileName, _ = QFileDialog.getSaveFileName(self, self.tr("Export Object Types"),
                                              lastPath,

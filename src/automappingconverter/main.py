@@ -18,13 +18,25 @@
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see <http://www.gnu.org/licenses/>.
 ##
+
+import sys
+sys.path.append('./../')
+sys.path.append('./../libtiled')
+sys.path.append('./../QtProperty')
+sys.path.append('./../libqt5')
+sys.path.append('./../tiled')
+sys.path.append('./../plugins')
+sys.path.append('./../automappingconverter')
+
 from converterwindow import ConverterWindow
 from PyQt5.QtWidgets import (
     QApplication
 )
-def main(argc, *argv):
-    a = QApplication(argc, argv)
+def main(argv):
+    a = QApplication(argv)
     w = ConverterWindow()
     w.show()
     return a.exec()
 
+if __name__ == '__main__':
+    main(sys.argv)

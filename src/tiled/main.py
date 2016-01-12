@@ -178,7 +178,7 @@ def main(argv):
             for format in formats:
                 if not format.hasCapabilities(MapFormat.Write):
                     continue
-                if format.nameFilter().contains(suffix, Qt.CaseInsensitive):
+                if suffix.lower() in format.nameFilter().lower():
                     if chosenFormat:
                         qWarning(QCoreApplication.translate("Command line", "Non-unique file extension. Can't determine correct export format."))
                         return 1

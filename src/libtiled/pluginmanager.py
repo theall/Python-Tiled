@@ -74,22 +74,22 @@ class PluginManager(QObject):
     # on the interfaces it implements.
     ##
     def addObject(object):
-        PluginManager.mInstance.mObjects.append(object)
-        PluginManager.mInstance.objectAdded.emit([object])
+        PluginManager.instance().mObjects.append(object)
+        PluginManager.instance().objectAdded.emit([object])
        
     ##
     # Removes the given \a object.
     ##
     def removeObject(self, object):
-        PluginManager.mInstance.objectAboutToBeRemoved.emit([object])
-        PluginManager.mInstance.mObjects.removeOne(object)
+        PluginManager.instance().objectAboutToBeRemoved.emit([object])
+        PluginManager.instance().mObjects.removeOne(object)
 
     ##
     # Returns the list of objects that implement a given interface.
     ##
     def objects(_type=None):
         results = QList()
-        for object in PluginManager.mInstance.mObjects:
+        for object in PluginManager.instance().mObjects:
             if _type!=None and type(object)!=_type:
                 continue
             results.append(object)
@@ -150,7 +150,7 @@ class PluginManager(QObject):
     # Calls the given function for each object implementing a given interface.
     ##
     def each(helper, function):
-        for object in PluginManager.mInstance.mObjects:
+        for object in PluginManager.instance().mObjects:
             if object:
                 function(helper, object)
     
