@@ -685,8 +685,10 @@ class TilesetDock(QDockWidget):
         tileset = view.tilesetModel().tileset()
         while (it != firstRange):
             it -= 1
+            item = tileIds.item(it)
+            length = item[1] - item[0] + 1
             undoStack.push(RemoveTiles(self.mMapDocument, tileset,
-                                            it.first(), it.length()))
+                                            item[0], length))
 
         undoStack.endMacro()
         # Clear the current tiles, will be referencing the removed tiles

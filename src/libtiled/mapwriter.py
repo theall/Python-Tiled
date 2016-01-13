@@ -454,7 +454,7 @@ class MapWriterPrivate():
             w.writeAttribute("height", str(layer.height()))
             
         if (not layer.isVisible()):
-            w.writeAttribute("visible"), "0"
+            w.writeAttribute("visible", "0")
         if (opacity != 1.0):
             w.writeAttribute("opacity", str(opacity))
         

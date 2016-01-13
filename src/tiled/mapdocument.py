@@ -777,10 +777,11 @@ class MapDocument(QObject):
     # signal.
     ##
     def setSelectedObjects(self, selectedObjects):
-        self.mSelectedObjects = selectedObjects
-        self.selectedObjectsChanged.emit()
-        if (selectedObjects.size() == 1):
-            self.setCurrentObject(selectedObjects.first())
+        if selectedObjects.nequal(self.mSelectedObjects):
+            self.mSelectedObjects = selectedObjects
+            self.selectedObjectsChanged.emit()
+            if (selectedObjects.size() == 1):
+                self.setCurrentObject(selectedObjects.first())
 
     ##
     # Returns the list of selected tiles.

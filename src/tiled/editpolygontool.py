@@ -623,13 +623,14 @@ def splitPolygonSegments(polygon, indexRanges, closed):
         lastRange = it
         lastRange -= 1# We know there is at least one range
         # Handle the case where the first and last nodes are selected
-        if (firstRange.first() == 0 and lastRange.last() == n - 1):
+        if (indexRanges.item(firstRange)[0] == 0 and indexRanges.item(lastRange)[1] == n - 1):
             splitPoint = (result.first() + result.last()) / 2
             result.append(splitPoint)
 
     while (it != firstRange):
         it -= 1
-        for i in range(it.last(), it.first(), -1):
+        item = indexRanges.item(it)
+        for i in range(item[1], item[0], -1):
             splitPoint = (result.at(i) + result.at(i - 1)) / 2
             result.insert(i, splitPoint)
 

@@ -184,7 +184,7 @@ class TileAnimationEditor(QWidget):
             return
         selectionModel = self.mUi.frameList.selectionModel()
         indexes = selectionModel.selectedIndexes()
-        if (indexes.isEmpty()):
+        if len(indexes)==0:
             return
         undoStack = self.mMapDocument.undoStack()
         undoStack.beginMacro(self.tr("Delete Frames"))
@@ -196,7 +196,9 @@ class TileAnimationEditor(QWidget):
         it = ranges.end()
         while (it != firstRange):
             it -= 1
-            self.mFrameListModel.removeRows(it.first(), it.length(), QModelIndex())
+            item = ranges.item(it)
+            length = item[1] - item[0] + 1
+            self.mFrameListModel.removeRows(item[0], length, QModelIndex())
 
         undoStack.endMacro()
 

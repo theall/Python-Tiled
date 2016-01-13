@@ -230,7 +230,23 @@ class QList(list):
         item = self.__getitem__(index)
         self.__delitem__(index)
         self.insert(to, item)
-            
+    
+    def equal(self, _list):
+        if self.__len__() != _list.__len__():
+            return False
+        for item in self.__iter__():
+            if not item in _list:
+                return False
+        return True
+        
+    def nequal(self, _list):
+        if self.__len__() != _list.__len__():
+            return True
+        for item in self.__iter__():
+            if not item in _list:
+                return True
+        return False
+
 class QMap(QList):
     def __init__(self, key=None, value=None):
         super(QMap, self).__init__()
@@ -290,10 +306,10 @@ class QMap(QList):
         return self.__len__()
 
     def end(self):
-        return None
+        return self.__len__()
 
     def contains(self, key):
-        return self.get(key)!=None
+        return self.get(key) != None
 
     def take(self, key):
         v = self.__getitem__(key)
@@ -342,7 +358,9 @@ class QMap(QList):
         return self.itemByIndex(0)
         
     def begin(self):
-        return 0
+        if self.__len__()>0:
+            return 0
+        return -1
         
 class QMapList(QMap):
     def __init__(self, key=None, value=None):

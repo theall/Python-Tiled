@@ -41,7 +41,8 @@ class AddRemoveTileset(QUndoCommand):
         TilesetManager.instance().addReference(self.mTileset)
 
     def __del__(self):
-        super(AddRemoveTileset, self).instance().removeReference(self.mTileset)
+        if super().instance():
+            super().instance().removeReference(self.mTileset)
 
     def addTileset(self):
         self.mMapDocument.insertTileset(self.mIndex, self.mTileset)
