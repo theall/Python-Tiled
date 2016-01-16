@@ -43,9 +43,9 @@ def setTerrainCorner(terrain, corner, terrainId):
 # A single frame of an animated tile.
 ##
 class Frame():
-    def __init__(self):
-        self.tileId = 0
-        self.duration = 0
+    def __init__(self, tileId=0, duration=0):
+        self.tileId = tileId
+        self.duration = duration
 
 class Tile(Object):
     def __init__(self, *args):

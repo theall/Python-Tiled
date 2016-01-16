@@ -191,8 +191,10 @@ class GidMapper():
     def decodeLayerData(self, tileLayer, layerData, format):
         if format in [Map.LayerDataFormat.XML, Map.LayerDataFormat.CSV]:
             raise
-
-        decodedData = QByteArray.fromBase64(layerData)
+            
+        _layerData = QByteArray()
+        _layerData.append(layerData)
+        decodedData = QByteArray.fromBase64(_layerData)
         size = (tileLayer.width() * tileLayer.height()) * 4
 
         if (format == Map.LayerDataFormat.Base64Gzip or format == Map.LayerDataFormat.Base64Zlib):
