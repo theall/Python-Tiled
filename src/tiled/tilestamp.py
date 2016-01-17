@@ -198,19 +198,21 @@ class TileStamp():
     
     def fromJson(json, mapDir):
         stamp = TileStamp()
-        stamp.setName(json.value("name").toString())
-        stamp.setQuickStampIndex(json["quickStampIndex"])
-        variations = json["variations"]
+        stamp.setName(json["name"].toString())
+        stamp.setQuickStampIndex(json.get("quickStampIndex"))
+        variations = [json["variations"]]
         for value in variations:
             variationJson = value.toObject()
-            mapVariant = variationJson.value("map").toVariant()
+            mapVariant = variationJson.get("map")
+            if mapVariant is None:
+                continue
             converter = VariantToMapConverter()
             map = converter.toMap(mapVariant, mapDir)
             if (not map):
                 qDebug("Failed to load map for stamp:" + converter.errorString())
                 continue
             
-            probability = variationJson.value("probability").toDouble(1)
+            probability = variationJson["probability"].toDouble(1)
             stamp.addVariation(map, probability)
         
         return stamp

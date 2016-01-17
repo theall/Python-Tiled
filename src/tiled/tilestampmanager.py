@@ -221,7 +221,7 @@ class TileStampManager(QObject):
             if (document.isNull()):
                 # document not valid binary data, maybe it's an JSON text file
                 error = QJsonParseError()
-                document, error = QJsonDocument.fromJson(data)
+                document = QJsonDocument.fromJson(data, error)
                 if (error.error != QJsonParseError.NoError):
                     qDebug("Failed to parse stamp file:" + error.errorString())
                     continue

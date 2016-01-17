@@ -33,18 +33,17 @@ from PyQt5.QtWidgets import (
     QFileDialog,
     QWidget
 )
-from pyqtcore import QString
 
 ##
 # A widget that combines a line edit with a button to choose a file.
 ##
 class FileEdit(QWidget):
-    filePathChanged = pyqtSignal(QString)
+    filePathChanged = pyqtSignal(str)
 
     def __init__(self, parent = None):
         super().__init__(parent)
 
-        self.mFilter = QString()
+        self.mFilter = ''
         self.mErrorTextColor = Qt.red
 
         layout = QHBoxLayout(self)
@@ -103,8 +102,8 @@ class FileEdit(QWidget):
         self.mLineEdit.setPalette(palette)
 
     def buttonClicked(self):
-        filePath = QFileDialog.getOpenFileName(self.window(), self.tr("Choose a File"), self.mLineEdit.text(), self.mFilter)
-        if (filePath.isNull()):
+        filePath, _ = QFileDialog.getOpenFileName(self.window(), self.tr("Choose a File"), self.mLineEdit.text(), self.mFilter)
+        if filePath=='':
             return
         self.mLineEdit.setText(filePath)
         self.filePathChanged.emit(filePath)
