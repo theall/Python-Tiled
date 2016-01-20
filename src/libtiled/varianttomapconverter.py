@@ -260,7 +260,8 @@ class VariantToMapConverter():
         
         # Read tile properties
         propertiesVariantMap = variantMap.get("tileproperties", {})
-        for it in propertiesVariantMap:
+        
+        for it in propertiesVariantMap.items():
             tileIndex = Int(it[0])
             propertiesVar = it[1]
             if (tileIndex >= 0 and tileIndex < tileset.tileCount()):

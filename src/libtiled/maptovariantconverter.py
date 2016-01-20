@@ -248,7 +248,7 @@ class MapToVariantConverter():
                     
                     if (tile.probability() != 1.0):
                         tileVariant["probability"] = tile.probability()
-                    if (not tile.imageSource().isEmpty()) :
+                    if tile.imageSource() != '':
                         rel = self.mMapDir.relativeFilePath(tile.imageSource())
                         tileVariant["image"] = rel
                     
