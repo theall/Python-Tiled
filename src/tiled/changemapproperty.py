@@ -1,5 +1,5 @@
 ##
-# changemapChangeMapProperty.py
+# changemapProperty.py
 # Copyright 2012, Emmanuel Barroga emmanuelbarroga@gmail.com
 #
 # This file is part of Tiled.

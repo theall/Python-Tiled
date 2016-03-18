@@ -227,6 +227,8 @@ class DocumentManager(QObject):
         if (mapDocument.fileName() != ''):
             self.mFileSystemWatcher.removePath(mapDocument.fileName())
 
+        self.mUndoGroup.removeStack(mapDocument.undoStack())
+        
     ##
     # Reloads the current document. Will not ask the user whether to save any
     # changes!
